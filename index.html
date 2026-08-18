@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Streaming Frontend</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header class="navbar">
+        <h1 class="logo">STREAM</h1>
+        <nav>
+            <a href="#">Home</a>
+            <a href="#">Series</a>
+            <a href="#">Films</a>
+        </nav>
+    </header>
+
+    <main>
+        <section class="hero" id="hero-section">
+            <div class="hero-content">
+                <h2 id="hero-title">Loading...</h2>
+                <p id="hero-desc"></p>
+                <button class="play-btn">▶ Play</button>
+            </div>
+            <!-- Video player will be injected here -->
+        </section>
+
+        <section class="catalog" id="catalog-section">
+            <h3>Trending Now</h3>
+            <div class="carousel" id="trending-carousel">
+                <!-- Video thumbnails injected via JS -->
+            </div>
+        </section>
+    </main>
+
+    <script src="app.js"></script>
+</body>
+</html>
