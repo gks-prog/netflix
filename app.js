@@ -1,85 +1,95 @@
-// This simulates fetching data from a remote database/CMS
-// NEVER upload video files directly to the GitHub repo
 const fetchExternalData = async () => {
-    // In production: const response = await fetch('https://your-api.com/videos');
-    // return await response.json();
-    
-    return [
-        {
-            id: 1,
-            title: "Cyberpunk City",
-            description: "A deep dive into futuristic urban landscapes.",
-            thumbnail: "https://images.unsplash.com/photo-1515630278258-407f66498911?auto=format&fit=crop&w=800&q=80",
-            videoUrl: "#" // Link to Mux or CDN stream here
-        },
-        {
-            id: 2,
-            title: "Mountain Heights",
-            description: "Exploring the highest peaks.",
-            thumbnail: "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=800&q=80",
-            videoUrl: "#"
-        },
-        {
-            id: 3,
-            title: "Ocean Depths",
-            description: "Into the blue.",
-            thumbnail: "https://images.unsplash.com/photo-1582967788606-a171c1080cb0?auto=format&fit=crop&w=800&q=80",
-            videoUrl: "#"
-        }
-    ];
+    // Simulating network delay for preloader visibility
+    return new Promise(resolve => {
+        setTimeout(() => {
+            resolve([
+                {
+                    id: 1,
+                    title: "Cyberpunk City",
+                    description: "A deep dive into futuristic urban landscapes.",
+                    thumbnail: "https://images.unsplash.com/photo-1515630278258-407f66498911?auto=format&fit=crop&w=1200&q=80",
+                    videoUrl: "#"
+                },
+                {
+                    id: 2,
+                    title: "Mountain Heights",
+                    description: "Exploring the highest peaks.",
+                    thumbnail: "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=800&q=80",
+                    videoUrl: "#"
+                },
+                {
+                    id: 3,
+                    title: "Ocean Depths",
+                    description: "Into the blue.",
+                    thumbnail: "https://images.unsplash.com/photo-1582967788606-a171c1080cb0?auto=format&fit=crop&w=800&q=80",
+                    videoUrl: "#"
+                }
+            ]);
+        }, 1200); // 1.2 second simulated load
+    });
 };
 
 const initApp = async () => {
-    const videos = await fetchExternalData();
-    const initApp = async () => {
     try {
-        // The preloader is currently spinning while this fetches
         const videos = await fetchExternalData();
         
-        // ... (Keep your existing hero and carousel population logic here) ...
+        // 1. Build the DOM FIRST
+        const hero = document.getElementById('hero-section');
+        const heroTitle = document.getElementById('hero-title');
+        const heroDesc = document.getElementById('hero-desc');
         
-        // Data is loaded and DOM is populated. Kill the preloader.
-        const preloader = document.getElementById('preloader');
-        preloader.style.opacity = '0';
-        
-        // Completely remove it from the DOM after the fade transition
-        setTimeout(() => {
-            preloader.remove();
-        }, 400); 
+        // Added a darker gradient overlay so text remains readable regardless of image brightness
+        hero.style.backgroundImage = `linear-gradient(to right, rgba(20,20,20,0.9) 0%, rgba(20,20,20,0.4) 100%), url(${videos[0].thumbnail})`;
+        heroTitle.textContent = videos[0].title;
+        heroDesc.textContent = videos[0].description;
+
+        const carousel = document.getElementById('trending-carousel');
+        videos.forEach(video => {
+            const card = document.createElement('div');
+            card.className = 'card';
+            card.style.backgroundImage = `url(${video.thumbnail})`;
+            
+            card.addEventListener('click', () => {
+                console.log(`Play video: ${video.title}`);
+                localStorage.setItem('lastWatched', video.id);
+            });
+            carousel.appendChild(card);
+        });
+
+        // 2. Orchestrate GSAP Animations
+        const tl = gsap.timeline();
+
+        tl.to('#preloader', { 
+            opacity: 0, 
+            duration: 0.6, 
+            ease: "power2.inOut",
+            onComplete: () => document.getElementById('preloader').remove() 
+        })
+        .from('.navbar', { 
+            y: -80, 
+            opacity: 0, 
+            duration: 0.8, 
+            ease: "power3.out" 
+        }, "-=0.2")
+        .from('.hero-content > *', { 
+            y: 30, 
+            opacity: 0, 
+            duration: 0.8, 
+            stagger: 0.15, 
+            ease: "power3.out" 
+        }, "-=0.6")
+        .from('.card', { 
+            x: 40, 
+            opacity: 0, 
+            duration: 0.6, 
+            stagger: 0.1, 
+            ease: "back.out(1.5)" 
+        }, "-=0.4");
 
     } catch (error) {
         console.error("Failed to load video data:", error);
-        // If data fails, you must still remove the preloader or the user is permanently stuck
-        document.getElementById('preloader').remove();
+        document.getElementById('preloader')?.remove();
     }
-};
-    
-    // Set Hero Section
-    const hero = document.getElementById('hero-section');
-    const heroTitle = document.getElementById('hero-title');
-    const heroDesc = document.getElementById('hero-desc');
-    
-    hero.style.backgroundImage = `linear-gradient(to right, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0) 100%), url(${videos[0].thumbnail})`;
-    heroTitle.textContent = videos[0].title;
-    heroDesc.textContent = videos[0].description;
-
-    // Populate Carousel
-    const carousel = document.getElementById('trending-carousel');
-    
-    videos.forEach(video => {
-        const card = document.createElement('div');
-        card.className = 'card';
-        card.style.backgroundImage = `url(${video.thumbnail})`;
-        
-        card.addEventListener('click', () => {
-            // Logic to open video player module
-            console.log(`Play video: ${video.title} from ${video.videoUrl}`);
-            // Save state to localStorage for the login-free history tracking
-            localStorage.setItem('lastWatched', video.id);
-        });
-        
-        carousel.appendChild(card);
-    });
 };
 
 document.addEventListener('DOMContentLoaded', initApp);
