@@ -10,7 +10,55 @@
     box-sizing: border-box;
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
+/* Preloader Container */
+#preloader {
+    position: fixed;
+    top: 0; 
+    left: 0; 
+    width: 100vw; 
+    height: 100vh;
+    background-color: var(--bg-color); /* Matches your dark UI */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+    transition: opacity 0.4s ease-out;
+}
 
+/* SVG Path Animation */
+.heart-loader {
+    width: 80px;
+    height: 80px;
+    fill: transparent;
+    stroke: #FFB6C1; /* Baby pink */
+    stroke-width: 2;
+    /* The dasharray length must match the total length of the SVG path */
+    stroke-dasharray: 250; 
+    stroke-dashoffset: 250;
+    animation: drawHeart 1.5s cubic-bezier(0.8, 0, 0.2, 1) forwards, 
+               pulse 1s infinite alternate 1.5s;
+}
+
+@keyframes drawHeart {
+    0% {
+        stroke-dashoffset: 250;
+        fill: transparent;
+    }
+    80% {
+        stroke-dashoffset: 0;
+        fill: transparent;
+    }
+    100% {
+        stroke-dashoffset: 0;
+        fill: #FFB6C1;
+        stroke: transparent;
+    }
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    100% { transform: scale(1.08); }
+}
 body {
     background-color: var(--bg-color);
     color: var(--text-color);
