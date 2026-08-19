@@ -26,8 +26,8 @@
 }
 /* Update your existing .heart-loader class */
 .heart-loader {
-    width: 80px;
-    height: 80px;
+    width: 270px;
+    height: 270px;
     fill: transparent;
     stroke: #FFB6C1; 
     stroke-width: 2;
