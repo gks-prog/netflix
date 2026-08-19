@@ -15,8 +15,8 @@
     position: fixed;
     top: 0; 
     left: 0; 
-    width: 100vw; 
-    height: 100vh;
+    width: 270vw; 
+    height: 270vh;
     background-color: var(--bg-color); /* Matches your dark UI */
     display: flex;
     justify-content: center;
