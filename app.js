@@ -24,7 +24,7 @@ const fetchExternalData = async () => {
                     videoUrl: "#"
                 }
             ]);
-        }, 1200); // Wait 1.2s to simulate network latency and show preloader
+        }, 1200); 
     });
 };
 
@@ -57,6 +57,8 @@ const initApp = async () => {
         // 2. Trigger the GSAP Timeline
         const tl = gsap.timeline();
         const heartLoader = document.querySelector('.heart-loader');
+        // CRITICAL FIX: Target the actual SVG path
+        const heartPath = heartLoader.querySelector('path'); 
         const preloader = document.getElementById('preloader');
 
         tl.to(heartLoader, {
@@ -65,7 +67,12 @@ const initApp = async () => {
             duration: 0.8,
             ease: "power4.in",
             onStart: () => {
-                heartLoader.style.animation = 'none'; // Stop CSS loop
+                // FORCE INLINE STYLES ON THE PATH BEFORE STRIPPING ANIMATION
+                heartPath.style.fill = '#FFB6C1';
+                heartPath.style.stroke = 'transparent';
+                
+                // Stop CSS loop on the wrapper
+                heartLoader.style.animation = 'none'; 
             }
         })
         .to(preloader, { 
@@ -73,9 +80,9 @@ const initApp = async () => {
             duration: 0.4, 
             ease: "power2.out",
             onStart: () => {
-                preloader.style.pointerEvents = 'none'; // Unblock clicks immediately
+                preloader.style.pointerEvents = 'none'; 
             },
-            onComplete: () => preloader.remove() // Strip from DOM
+            onComplete: () => preloader.remove() 
         }, "-=0.4")
         .from('.navbar', { 
             y: -80, 
@@ -100,7 +107,7 @@ const initApp = async () => {
 
     } catch (error) {
         console.error("Failed to load application data:", error);
-        document.getElementById('preloader')?.remove(); // Fail-safe
+        document.getElementById('preloader')?.remove(); 
     }
 };
 
