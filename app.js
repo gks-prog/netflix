@@ -24,7 +24,7 @@ const fetchExternalData = async () => {
                     videoUrl: "#"
                 }
             ]);
-        }, 1200);
+        }, 1200); // Wait 1.2s to simulate network latency and show preloader
     });
 };
 
@@ -32,7 +32,7 @@ const initApp = async () => {
     try {
         const videos = await fetchExternalData();
         
-        // 1. Build DOM
+        // 1. Build DOM Elements First
         const hero = document.getElementById('hero-section');
         const heroTitle = document.getElementById('hero-title');
         const heroDesc = document.getElementById('hero-desc');
@@ -54,9 +54,10 @@ const initApp = async () => {
             carousel.appendChild(card);
         });
 
-        // 2. Orchestrate GSAP Zoom-Wipe
+        // 2. Trigger the GSAP Timeline
         const tl = gsap.timeline();
         const heartLoader = document.querySelector('.heart-loader');
+        const preloader = document.getElementById('preloader');
 
         tl.to(heartLoader, {
             scale: 50,
@@ -64,19 +65,17 @@ const initApp = async () => {
             duration: 0.8,
             ease: "power4.in",
             onStart: () => {
-                // Kill CSS animation to prevent collision
-                heartLoader.style.animation = 'none';
+                heartLoader.style.animation = 'none'; // Stop CSS loop
             }
         })
-        .to('#preloader', { 
+        .to(preloader, { 
             opacity: 0, 
             duration: 0.4, 
             ease: "power2.out",
             onStart: () => {
-                // Instantly unblock the UI layer beneath it
-                document.getElementById('preloader').style.pointerEvents = 'none';
+                preloader.style.pointerEvents = 'none'; // Unblock clicks immediately
             },
-            onComplete: () => document.getElementById('preloader').remove() 
+            onComplete: () => preloader.remove() // Strip from DOM
         }, "-=0.4")
         .from('.navbar', { 
             y: -80, 
@@ -100,8 +99,8 @@ const initApp = async () => {
         }, "-=0.4");
 
     } catch (error) {
-        console.error("Failed to load video data:", error);
-        document.getElementById('preloader')?.remove();
+        console.error("Failed to load application data:", error);
+        document.getElementById('preloader')?.remove(); // Fail-safe
     }
 };
 
