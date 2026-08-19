@@ -24,7 +24,20 @@
     z-index: 9999;
     transition: opacity 0.4s ease-out;
 }
-
+/* Update your existing .heart-loader class */
+.heart-loader {
+    width: 80px;
+    height: 80px;
+    fill: transparent;
+    stroke: #FFB6C1; 
+    stroke-width: 2;
+    stroke-dasharray: 250; 
+    stroke-dashoffset: 250;
+    transform-origin: center center; /* Crucial for GSAP scaling */
+    will-change: transform, opacity; /* Hardware acceleration */
+    animation: drawHeart 1.5s cubic-bezier(0.8, 0, 0.2, 1) forwards, 
+               pulse 1s infinite alternate 1.5s;
+}
 /* SVG Path Animation */
 .heart-loader {
     width: 80px;
