@@ -59,12 +59,12 @@ const initApp = async () => {
         const heartLoader = document.querySelector('.heart-loader');
 
         tl.to(heartLoader, {
-            scale: 50, // Blow up to screen size
+            scale: 50,
             opacity: 0,
             duration: 0.8,
-            ease: "power4.in", // Starts slow, accelerates rapidly
+            ease: "power4.in",
             onStart: () => {
-                // FORCE KILL the CSS animation to prevent property collisions
+                // Kill CSS animation to prevent collision
                 heartLoader.style.animation = 'none';
             }
         })
@@ -72,8 +72,12 @@ const initApp = async () => {
             opacity: 0, 
             duration: 0.4, 
             ease: "power2.out",
+            onStart: () => {
+                // Instantly unblock the UI layer beneath it
+                document.getElementById('preloader').style.pointerEvents = 'none';
+            },
             onComplete: () => document.getElementById('preloader').remove() 
-        }, "-=0.4") // Start fading preloader background right before heart finishes scaling
+        }, "-=0.4")
         .from('.navbar', { 
             y: -80, 
             opacity: 0, 
