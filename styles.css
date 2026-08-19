@@ -10,20 +10,7 @@
     box-sizing: border-box;
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
-/* Preloader Container */
-#preloader {
-    position: fixed;
-    top: 0; 
-    left: 0; 
-    width: 270vw; 
-    height: 270vh;
-    background-color: var(--bg-color); /* Matches your dark UI */
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 9999;
-    transition: opacity 0.4s ease-out;
-}
+
 /* Update your existing .heart-loader class */
 .heart-loader {
     width: 270px;
