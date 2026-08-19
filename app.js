@@ -1,5 +1,4 @@
 const fetchExternalData = async () => {
-    // Simulating network delay for preloader visibility
     return new Promise(resolve => {
         setTimeout(() => {
             resolve([
@@ -25,7 +24,7 @@ const fetchExternalData = async () => {
                     videoUrl: "#"
                 }
             ]);
-        }, 1200); // 1.2 second simulated load
+        }, 1200);
     });
 };
 
@@ -33,12 +32,11 @@ const initApp = async () => {
     try {
         const videos = await fetchExternalData();
         
-        // 1. Build the DOM FIRST
+        // 1. Build DOM
         const hero = document.getElementById('hero-section');
         const heroTitle = document.getElementById('hero-title');
         const heroDesc = document.getElementById('hero-desc');
         
-        // Added a darker gradient overlay so text remains readable regardless of image brightness
         hero.style.backgroundImage = `linear-gradient(to right, rgba(20,20,20,0.9) 0%, rgba(20,20,20,0.4) 100%), url(${videos[0].thumbnail})`;
         heroTitle.textContent = videos[0].title;
         heroDesc.textContent = videos[0].description;
@@ -56,15 +54,26 @@ const initApp = async () => {
             carousel.appendChild(card);
         });
 
-        // 2. Orchestrate GSAP Animations
+        // 2. Orchestrate GSAP Zoom-Wipe
         const tl = gsap.timeline();
+        const heartLoader = document.querySelector('.heart-loader');
 
-        tl.to('#preloader', { 
-            opacity: 0, 
-            duration: 0.6, 
-            ease: "power2.inOut",
-            onComplete: () => document.getElementById('preloader').remove() 
+        tl.to(heartLoader, {
+            scale: 50, // Blow up to screen size
+            opacity: 0,
+            duration: 0.8,
+            ease: "power4.in", // Starts slow, accelerates rapidly
+            onStart: () => {
+                // FORCE KILL the CSS animation to prevent property collisions
+                heartLoader.style.animation = 'none';
+            }
         })
+        .to('#preloader', { 
+            opacity: 0, 
+            duration: 0.4, 
+            ease: "power2.out",
+            onComplete: () => document.getElementById('preloader').remove() 
+        }, "-=0.4") // Start fading preloader background right before heart finishes scaling
         .from('.navbar', { 
             y: -80, 
             opacity: 0, 
