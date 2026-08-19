@@ -5,28 +5,15 @@
     left: 0; 
     width: 100vw; 
     height: 100vh;
-    background-color: var(--bg-color); /* Matches your dark UI */
+    background-color: var(--bg-color);
     display: flex;
     justify-content: center;
     align-items: center;
     z-index: 9999;
-    transition: opacity 0.4s ease-out;
+    /* REMOVED: transition: opacity 0.4s ease-out; -> GSAP handles this now */
 }
 
-/* SVG Path Animation */
-.heart-loader {
-    width: 80px;
-    height: 80px;
-    fill: transparent;
-    stroke: #FFB6C1; /* Baby pink */
-    stroke-width: 2;
-    /* The dasharray length must match the total length of the SVG path */
-    stroke-dasharray: 250; 
-    stroke-dashoffset: 250;
-    animation: drawHeart 1.5s cubic-bezier(0.8, 0, 0.2, 1) forwards, 
-               pulse 1s infinite alternate 1.5s;
-}
-/* Update your existing .heart-loader class */
+/* SVG Path Animation - Merged and Cleaned */
 .heart-loader {
     width: 80px;
     height: 80px;
@@ -35,11 +22,12 @@
     stroke-width: 2;
     stroke-dasharray: 250; 
     stroke-dashoffset: 250;
-    transform-origin: center center; /* Crucial for GSAP scaling */
-    will-change: transform, opacity; /* Hardware acceleration */
+    transform-origin: center center; 
+    will-change: transform, opacity; 
     animation: drawHeart 1.5s cubic-bezier(0.8, 0, 0.2, 1) forwards, 
                pulse 1s infinite alternate 1.5s;
 }
+
 @keyframes drawHeart {
     0% {
         stroke-dashoffset: 250;
