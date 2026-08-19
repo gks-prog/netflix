@@ -31,6 +31,28 @@ const fetchExternalData = async () => {
 
 const initApp = async () => {
     const videos = await fetchExternalData();
+    const initApp = async () => {
+    try {
+        // The preloader is currently spinning while this fetches
+        const videos = await fetchExternalData();
+        
+        // ... (Keep your existing hero and carousel population logic here) ...
+        
+        // Data is loaded and DOM is populated. Kill the preloader.
+        const preloader = document.getElementById('preloader');
+        preloader.style.opacity = '0';
+        
+        // Completely remove it from the DOM after the fade transition
+        setTimeout(() => {
+            preloader.remove();
+        }, 400); 
+
+    } catch (error) {
+        console.error("Failed to load video data:", error);
+        // If data fails, you must still remove the preloader or the user is permanently stuck
+        document.getElementById('preloader').remove();
+    }
+};
     
     // Set Hero Section
     const hero = document.getElementById('hero-section');
