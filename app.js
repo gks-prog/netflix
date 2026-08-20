@@ -7,7 +7,7 @@ const fetchExternalData = async () => {
                     title: "Her",
                     description: "A beautiful creation of the god on earth.",
                     thumbnail: "https://drive.google.com/thumbnail?id=1tsyy0OIAWh-l6q4RbzAellncKxKrwb8_&sz=w1200",
-                    videoUrl: "#" 
+                    videoUrl: "https://drive.google.com/uc?export=download&id=1EFvsfwKlmsulQEDAAJSjraLoqLmNkKzj" 
                 },
                 {
                     id: 2,
@@ -41,17 +41,16 @@ const initApp = async () => {
         heroTitle.textContent = videos[0].title;
         heroDesc.textContent = videos[0].description;
 
-        // --- Hero Play Button Logic (Custom Video Player) ---
+        // --- Custom HTML5 Player Logic ---
         const playBtn = document.querySelector('.play-btn');
-        playBtn.addEventListener('click', () => {
+        playBtn.addEventListener('click', async () => {
             const modal = document.createElement('div');
             modal.id = 'video-modal';
             
-            // Constructing the custom UI
             modal.innerHTML = `
                 <div class="close-video">&times;</div>
                 <div class="video-container" id="video-container">
-                    <video id="main-video" src="https://drive.google.com/uc?export=download&id=1EFvsfwKlmsulQEDAAJSjraLoqLmNkKzj" autoplay></video>
+                    <video id="main-video" src="${videos[0].videoUrl}"></video>
                     <div class="custom-controls">
                         <input type="range" id="progress-bar" value="0" min="0" max="100" step="0.1">
                         <div class="control-buttons">
@@ -71,7 +70,6 @@ const initApp = async () => {
             `;
             document.body.appendChild(modal);
             
-            // Map DOM elements
             const video = document.getElementById('main-video');
             const container = document.getElementById('video-container');
             const progressBar = document.getElementById('progress-bar');
@@ -80,19 +78,19 @@ const initApp = async () => {
             const fullscreenBtn = document.getElementById('fullscreen-btn');
             const closeBtn = modal.querySelector('.close-video');
 
-            // 1. Playbar Sync (Updates slider as video plays)
+            // Playbar Sync
             video.addEventListener('timeupdate', () => {
                 if(video.duration) {
                     progressBar.value = (video.currentTime / video.duration) * 100;
                 }
             });
 
-            // 2. Seeking (Updates video when slider is dragged)
+            // Seeking
             progressBar.addEventListener('input', (e) => {
                 video.currentTime = (e.target.value / 100) * video.duration;
             });
 
-            // 3. Play/Pause Toggle
+            // Play/Pause
             playPauseBtn.addEventListener('click', () => {
                 if (video.paused) {
                     video.play();
@@ -103,12 +101,12 @@ const initApp = async () => {
                 }
             });
 
-            // 4. Playback Speed
+            // Playback Speed
             speedControl.addEventListener('change', (e) => {
                 video.playbackRate = e.target.value;
             });
 
-            // 5. Fullscreen API
+            // Fullscreen API
             fullscreenBtn.addEventListener('click', () => {
                 if (!document.fullscreenElement) {
                     container.requestFullscreen().catch(err => console.log(err));
@@ -119,11 +117,19 @@ const initApp = async () => {
 
             // GSAP Fade-in
             gsap.to(modal, { opacity: 1, duration: 0.4, ease: "power2.out" });
+
+            // Force Play and attempt Fullscreen immediately
+            try {
+                await video.play();
+                await container.requestFullscreen();
+            } catch (err) {
+                console.warn("Browser blocked auto-fullscreen or auto-play without gesture:", err);
+            }
             
             // Destruction Logic
             closeBtn.addEventListener('click', () => {
                 video.pause(); 
-                if (document.fullscreenElement) document.exitFullscreen(); // Exit FS before closing
+                if (document.fullscreenElement) document.exitFullscreen();
                 gsap.to(modal, {
                     opacity: 0,
                     duration: 0.3,
@@ -131,7 +137,7 @@ const initApp = async () => {
                 });
             });
         });
-        // ---------------------------------------------------
+        // ---------------------------------------------
 
         const carousel = document.getElementById('trending-carousel');
         videos.forEach(video => {
@@ -139,7 +145,6 @@ const initApp = async () => {
             card.className = 'card';
             card.style.backgroundImage = `url('${video.thumbnail}')`;
             
-            // Inject Hover Overlay
             const overlay = document.createElement('div');
             overlay.className = 'card-overlay';
             overlay.textContent = 'work in progress please wait to be amused';
