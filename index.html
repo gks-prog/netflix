@@ -7,14 +7,12 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <!-- Preloader -->
     <div id="preloader">
         <svg viewBox="0 0 100 100" class="heart-loader">
             <path d="M 50,30 C 50,30 40,10 25,10 C 10,10 5,25 5,40 C 5,60 50,90 50,90 C 50,90 95,60 95,40 C 95,25 90,10 75,10 C 60,10 50,30 50,30 Z" />
         </svg>
     </div>
     
-    <!-- Navbar -->
     <header class="navbar">
         <h1 class="logo">Betti</h1>
         <nav>
@@ -24,7 +22,6 @@
         </nav>
     </header>
 
-    <!-- Main Content -->
     <main>
         <section class="hero" id="hero-section">
             <div class="hero-content">
@@ -40,9 +37,18 @@
                 <!-- Video thumbnails injected via JS -->
             </div>
         </section>
+
+        <!-- NEW: 3D Orbital Gallery Section -->
+        <section class="gallery-section" id="gallery-section">
+            <h3>Explore 3D Space</h3>
+            <div class="scene">
+                <div class="carousel-3d" id="carousel-3d">
+                    <!-- 3D Photos injected via JS -->
+                </div>
+            </div>
+        </section>
     </main>
 
-    <!-- Scripts -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
     <script src="app.js"></script>
 </body>
