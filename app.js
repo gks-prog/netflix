@@ -6,9 +6,9 @@ const fetchExternalData = async () => {
                     id: 1,
                     title: "Her",
                     description: "A beautiful creation of the god on earth.",
-                    // CRITICAL FIX: Removed markdown brackets from the URL strings
-                    thumbnail: "https://drive.google.com/uc?export=view&id=1tsyy0OIAWh-l6q4RbzAellncKxKrwb8_",
-                    videoUrl: "https://drive.google.com/uc?export=download&id=1EFvsfwKlmsulQEDAAJSjraLoqLmNkKzj"
+                    // CRITICAL FIX: Using Google Drive's hidden thumbnail API
+                    thumbnail: "https://drive.google.com/thumbnail?id=1tsyy0OIAWh-l6q4RbzAellncKxKrwb8_&sz=w1200",
+                    videoUrl: "#" // Not used for the Drive iframe workaround
                 },
                 {
                     id: 2,
@@ -52,20 +52,22 @@ const initApp = async () => {
             closeBtn.className = 'close-video';
             closeBtn.innerHTML = '&times;';
             
-            const video = document.createElement('video');
-            // INJECTED: Google Drive Direct Video Link
-            video.src = 'https://drive.google.com/uc?export=download&id=1EFvsfwKlmsulQEDAAJSjraLoqLmNkKzj';
-            video.controls = true;
-            video.autoplay = true; 
+            // CRITICAL FIX: Swap <video> for <iframe> to bypass CORS block
+            const iframe = document.createElement('iframe');
+            iframe.src = 'https://drive.google.com/file/d/1EFvsfwKlmsulQEDAAJSjraLoqLmNkKzj/preview';
+            iframe.width = '80%'; // Keeps it cinematic inside the modal
+            iframe.height = '80%';
+            iframe.style.border = 'none';
+            iframe.allow = 'autoplay'; 
             
             modal.appendChild(closeBtn);
-            modal.appendChild(video);
+            modal.appendChild(iframe);
             document.body.appendChild(modal);
             
             gsap.to(modal, { opacity: 1, duration: 0.4, ease: "power2.out" });
             
             closeBtn.addEventListener('click', () => {
-                video.pause(); 
+                // Iframe audio keeps playing if you don't destroy the node immediately
                 gsap.to(modal, {
                     opacity: 0,
                     duration: 0.3,
