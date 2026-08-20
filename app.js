@@ -6,8 +6,8 @@ const fetchExternalData = async () => {
                     id: 1,
                     title: "Her",
                     description: "A beautiful creation of the god on earth.",
-                    thumbnail: "https://drive.google.com/uc?export=download&id=1tsyy0OIAWh-l6q4RbzAellncKxKrwb8_",
-                    videoUrl: "https://drive.google.com/uc?export=download&id=1EFvsfwKlmsulQEDAAJSjraLoqLmNkKzj"
+                    thumbnail: "[https://drive.google.com/uc?export=view&id=1tsyy0OIAWh-l6q4RbzAellncKxKrwb8](https://drive.google.com/uc?export=view&id=1tsyy0OIAWh-l6q4RbzAellncKxKrwb8)_",
+                    videoUrl: "[https://drive.google.com/uc?export=download&id=1EFvsfwKlmsulQEDAAJSjraLoqLmNkKzj](https://drive.google.com/uc?export=download&id=1EFvsfwKlmsulQEDAAJSjraLoqLmNkKzj)"
                 },
                 {
                     id: 2,
