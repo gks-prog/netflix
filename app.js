@@ -6,8 +6,9 @@ const fetchExternalData = async () => {
                     id: 1,
                     title: "Her",
                     description: "A beautiful creation of the god on earth.",
-                    thumbnail: "[https://drive.google.com/uc?export=view&id=1tsyy0OIAWh-l6q4RbzAellncKxKrwb8](https://drive.google.com/uc?export=view&id=1tsyy0OIAWh-l6q4RbzAellncKxKrwb8)_",
-                    videoUrl: "[https://drive.google.com/uc?export=download&id=1EFvsfwKlmsulQEDAAJSjraLoqLmNkKzj](https://drive.google.com/uc?export=download&id=1EFvsfwKlmsulQEDAAJSjraLoqLmNkKzj)"
+                    // CRITICAL FIX: Removed markdown brackets from the URL strings
+                    thumbnail: "https://drive.google.com/uc?export=view&id=1tsyy0OIAWh-l6q4RbzAellncKxKrwb8_",
+                    videoUrl: "https://drive.google.com/uc?export=download&id=1EFvsfwKlmsulQEDAAJSjraLoqLmNkKzj"
                 },
                 {
                     id: 2,
@@ -32,12 +33,12 @@ const initApp = async () => {
     try {
         const videos = await fetchExternalData();
         
-        // 1. Build DOM Elements
+        // 1. Build DOM Elements First
         const hero = document.getElementById('hero-section');
         const heroTitle = document.getElementById('hero-title');
         const heroDesc = document.getElementById('hero-desc');
         
-        hero.style.backgroundImage = `linear-gradient(to right, rgba(20,20,20,0.9) 0%, rgba(20,20,20,0.4) 100%), url(${videos[0].thumbnail})`;
+        hero.style.backgroundImage = `linear-gradient(to right, rgba(20,20,20,0.9) 0%, rgba(20,20,20,0.4) 100%), url('${videos[0].thumbnail}')`;
         heroTitle.textContent = videos[0].title;
         heroDesc.textContent = videos[0].description;
 
@@ -52,7 +53,8 @@ const initApp = async () => {
             closeBtn.innerHTML = '&times;';
             
             const video = document.createElement('video');
-            video.src = 'https://storage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4';
+            // INJECTED: Google Drive Direct Video Link
+            video.src = 'https://drive.google.com/uc?export=download&id=1EFvsfwKlmsulQEDAAJSjraLoqLmNkKzj';
             video.controls = true;
             video.autoplay = true; 
             
@@ -77,7 +79,7 @@ const initApp = async () => {
         videos.forEach(video => {
             const card = document.createElement('div');
             card.className = 'card';
-            card.style.backgroundImage = `url(${video.thumbnail})`;
+            card.style.backgroundImage = `url('${video.thumbnail}')`;
             
             // Inject Hover Overlay
             const overlay = document.createElement('div');
