@@ -3,17 +3,23 @@ const fetchExternalData = async () => {
         setTimeout(() => {
             resolve([
                 {
-                    id: 1, title: "Her", description: "A beautiful creation of the god on earth.",
+                    id: 1,
+                    title: "Her",
+                    description: "A beautiful creation of the god on earth.",
                     thumbnail: "https://drive.google.com/thumbnail?id=1tsyy0OIAWh-l6q4RbzAellncKxKrwb8_&sz=w1200",
                     videoEmbedUrl: "https://drive.google.com/file/d/1EFvsfwKlmsulQEDAAJSjraLoqLmNkKzj/preview"
                 },
                 {
-                    id: 2, title: "Earrings", description: "Exploring the highest peaks.",
+                    id: 2,
+                    title: "Earrings",
+                    description: "Exploring the highest peaks.",
                     thumbnail: "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=800&q=80",
                     videoEmbedUrl: ""
                 },
                 {
-                    id: 3, title: "Ocean like Eyes", description: "Into the blue.",
+                    id: 3,
+                    title: "Ocean like Eyes",
+                    description: "Into the blue.",
                     thumbnail: "https://images.unsplash.com/photo-1582967788606-a171c1080cb0?auto=format&fit=crop&w=800&q=80",
                     videoEmbedUrl: ""
                 }
@@ -22,15 +28,15 @@ const fetchExternalData = async () => {
     });
 };
 
-// Data for the 3D Gallery Orbit
+// --- NEW: Injected your 7 Google Drive images using the thumbnail API ---
 const orbitalImages = [
-    "https://images.unsplash.com/photo-1755331039789-7e5680e26e8f?auto=format&fit=crop&w=600&q=80",
-    "https://images.unsplash.com/photo-1755569309049-98410b94f66d?auto=format&fit=crop&w=600&q=80",
-    "https://images.unsplash.com/photo-1755497595318-7e5e3523854f?auto=format&fit=crop&w=600&q=80",
-    "https://images.unsplash.com/photo-1755353985163-c2a0fe5ac3d8?auto=format&fit=crop&w=600&q=80",
-    "https://images.unsplash.com/photo-1745965976680-d00be7dc0377?auto=format&fit=crop&w=600&q=80",
-    "https://images.unsplash.com/photo-1752588975228-21f44630bb3c?auto=format&fit=crop&w=600&q=80",
-    "https://images.unsplash.com/photo-1515630278258-407f66498911?auto=format&fit=crop&w=600&q=80"
+    "https://drive.google.com/thumbnail?id=1yoGMAfJqxtYDVbGwFyfUOqksmJFjyyuV&sz=w800",
+    "https://drive.google.com/thumbnail?id=1xnjGgxHiGJtyqF6A4Wwl8D2AjTE_yr1e&sz=w800",
+    "https://drive.google.com/thumbnail?id=1SKYnz8UcFb4rleL4Q71CdDQZfjP4LzK1&sz=w800",
+    "https://drive.google.com/thumbnail?id=1IYnFE0RePrUDYJb88tx5Q5FE7IlRAY7X&sz=w800",
+    "https://drive.google.com/thumbnail?id=1z2w2CdXRCDwA7SILUlbqrGWGkcXP1fLJ&sz=w800",
+    "https://drive.google.com/thumbnail?id=1JJKGVLHWpCZbmXodYox3BaAbwXt9vQMo&sz=w800",
+    "https://drive.google.com/thumbnail?id=1pzDYoTwzqKD2wrwgIVAuYaJKfopyDjfY&sz=w800"
 ];
 
 const initApp = async () => {
@@ -84,16 +90,15 @@ const initApp = async () => {
             carousel.appendChild(card);
         });
 
-        // --- NEW: 4. Build 3D Orbital Gallery ---
+        // 4. Build 3D Orbital Gallery
         const carousel3d = document.getElementById('carousel-3d');
-        const radius = 450; // Distance of images from center point
+        const radius = 450; 
         
         // Inject images in a circular pattern
         orbitalImages.forEach((src, i) => {
             const angle = (360 / orbitalImages.length) * i;
             const item = document.createElement('div');
             item.className = 'carousel-item';
-            // TranslateZ pushes it outward, RotateY orbits it
             item.style.transform = `rotateY(${angle}deg) translateZ(${radius}px)`;
             item.innerHTML = `<img src="${src}" alt="Orbital Image">`;
             carousel3d.appendChild(item);
@@ -106,21 +111,19 @@ const initApp = async () => {
         let startRotation = 0;
         const scene = document.querySelector('.scene');
 
-        // Set initial GSAP 3D position
         gsap.set(carousel3d, { z: -radius, rotationY: 0, transformStyle: "preserve-3d" });
 
-        // Pointer Events for Desktop + Mobile Touch support
         scene.addEventListener('pointerdown', (e) => {
             isDragging = true;
             startX = e.clientX;
             startRotation = rotationY;
-            gsap.killTweensOf(carousel3d); // Stop momentum if grabbed mid-spin
+            gsap.killTweensOf(carousel3d); 
         });
 
         window.addEventListener('pointermove', (e) => {
             if (!isDragging) return;
             const deltaX = e.clientX - startX;
-            rotationY = startRotation + (deltaX * 0.4); // 0.4 is drag sensitivity
+            rotationY = startRotation + (deltaX * 0.4); 
             gsap.set(carousel3d, { rotationY: rotationY });
         });
 
@@ -128,7 +131,6 @@ const initApp = async () => {
             if (!isDragging) return;
             isDragging = false;
             
-            // Add momentum/glide after release
             const deltaX = e.clientX - startX;
             rotationY = startRotation + (deltaX * 0.4);
             
@@ -137,7 +139,6 @@ const initApp = async () => {
                 duration: 1.5,
                 ease: "power2.out",
                 onUpdate: () => {
-                    // Sync our local variable with GSAP's physics calculations
                     rotationY = gsap.getProperty(carousel3d, "rotationY");
                 }
             });
