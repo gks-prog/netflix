@@ -6,7 +6,7 @@ const fetchExternalData = async () => {
                     id: 1,
                     title: "Her",
                     description: "A beautiful creation of the god on earth.",
-                    thumbnail: "https://images.unsplash.com/photo-1515630278258-407f66498911?auto=format&fit=crop&w=1200&q=80",
+                    thumbnail: "https://drive.google.com/uc?export=download&id=1tsyy0OIAWh-l6q4RbzAellncKxKrwb8_",
                     videoUrl: "#"
                 },
                 {
