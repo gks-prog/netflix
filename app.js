@@ -47,6 +47,13 @@ const initApp = async () => {
             card.className = 'card';
             card.style.backgroundImage = `url(${video.thumbnail})`;
             
+            // --- NEW: Inject Hover Overlay ---
+            const overlay = document.createElement('div');
+            overlay.className = 'card-overlay';
+            overlay.textContent = 'work in progress please wait to be amused';
+            card.appendChild(overlay);
+            // ---------------------------------
+
             card.addEventListener('click', () => {
                 console.log(`Play video: ${video.title}`);
                 localStorage.setItem('lastWatched', video.id);
@@ -57,7 +64,6 @@ const initApp = async () => {
         // 2. Trigger the GSAP Timeline
         const tl = gsap.timeline();
         const heartLoader = document.querySelector('.heart-loader');
-        // CRITICAL FIX: Target the actual SVG path
         const heartPath = heartLoader.querySelector('path'); 
         const preloader = document.getElementById('preloader');
 
@@ -67,11 +73,8 @@ const initApp = async () => {
             duration: 0.8,
             ease: "power4.in",
             onStart: () => {
-                // FORCE INLINE STYLES ON THE PATH BEFORE STRIPPING ANIMATION
                 heartPath.style.fill = '#FFB6C1';
                 heartPath.style.stroke = 'transparent';
-                
-                // Stop CSS loop on the wrapper
                 heartLoader.style.animation = 'none'; 
             }
         })
