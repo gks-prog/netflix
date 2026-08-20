@@ -168,9 +168,36 @@ body {
     cursor: pointer;
     background-size: cover;
     background-position: center;
+    position: relative; /* CRITICAL: Contains the absolute overlay */
+    overflow: hidden;   /* CRITICAL: Prevents overlay from breaking corners */
 }
 
 .card:hover {
     transform: scale(1.05);
     z-index: 2;
+}
+
+/* --- NEW: Hover Overlay Styles --- */
+.card-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.75);
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 15px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    line-height: 1.4;
+    opacity: 0; 
+    transition: opacity 0.3s ease-in-out;
+}
+
+.card:hover .card-overlay {
+    opacity: 1;
 }
