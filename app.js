@@ -7,21 +7,21 @@ const fetchExternalData = async () => {
                     title: "Her",
                     description: "A beautiful creation of the god on earth.",
                     thumbnail: "https://drive.google.com/thumbnail?id=1tsyy0OIAWh-l6q4RbzAellncKxKrwb8_&sz=w1200",
-                    videoUrl: "https://drive.google.com/uc?export=download&id=1EFvsfwKlmsulQEDAAJSjraLoqLmNkKzj" 
+                    videoEmbedUrl: "https://drive.google.com/file/d/1EFvsfwKlmsulQEDAAJSjraLoqLmNkKzj/preview"
                 },
                 {
                     id: 2,
                     title: "Earrings",
                     description: "Exploring the highest peaks.",
                     thumbnail: "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=800&q=80",
-                    videoUrl: "#"
+                    videoEmbedUrl: ""
                 },
                 {
                     id: 3,
                     title: "Ocean like Eyes",
                     description: "Into the blue.",
                     thumbnail: "https://images.unsplash.com/photo-1582967788606-a171c1080cb0?auto=format&fit=crop&w=800&q=80",
-                    videoUrl: "#"
+                    videoEmbedUrl: ""
                 }
             ]);
         }, 1200); 
@@ -41,95 +41,32 @@ const initApp = async () => {
         heroTitle.textContent = videos[0].title;
         heroDesc.textContent = videos[0].description;
 
-        // --- Custom HTML5 Player Logic ---
+        // --- Working Video Modal Implementation ---
         const playBtn = document.querySelector('.play-btn');
-        playBtn.addEventListener('click', async () => {
+        playBtn.addEventListener('click', () => {
             const modal = document.createElement('div');
             modal.id = 'video-modal';
             
             modal.innerHTML = `
                 <div class="close-video">&times;</div>
-                <div class="video-container" id="video-container">
-                    <video id="main-video" src="${videos[0].videoUrl}"></video>
-                    <div class="custom-controls">
-                        <input type="range" id="progress-bar" value="0" min="0" max="100" step="0.1">
-                        <div class="control-buttons">
-                            <div class="control-left">
-                                <button id="play-pause">⏸</button>
-                                <select id="speed-control">
-                                    <option value="0.5">0.5x</option>
-                                    <option value="1" selected>1x Normal</option>
-                                    <option value="1.5">1.5x</option>
-                                    <option value="2">2x</option>
-                                </select>
-                            </div>
-                            <button id="fullscreen-btn">⛶</button>
-                        </div>
-                    </div>
+                <div class="video-container" id="video-container" style="width: 90vw; height: 85vh; max-width: 1600px;">
+                    <iframe 
+                        src="${videos[0].videoEmbedUrl}" 
+                        style="width: 100%; height: 100%; border: none; border-radius: 8px;" 
+                        allow="autoplay; fullscreen" 
+                        allowfullscreen>
+                    </iframe>
                 </div>
             `;
             document.body.appendChild(modal);
-            
-            const video = document.getElementById('main-video');
-            const container = document.getElementById('video-container');
-            const progressBar = document.getElementById('progress-bar');
-            const playPauseBtn = document.getElementById('play-pause');
-            const speedControl = document.getElementById('speed-control');
-            const fullscreenBtn = document.getElementById('fullscreen-btn');
+
             const closeBtn = modal.querySelector('.close-video');
-
-            // Playbar Sync
-            video.addEventListener('timeupdate', () => {
-                if(video.duration) {
-                    progressBar.value = (video.currentTime / video.duration) * 100;
-                }
-            });
-
-            // Seeking
-            progressBar.addEventListener('input', (e) => {
-                video.currentTime = (e.target.value / 100) * video.duration;
-            });
-
-            // Play/Pause
-            playPauseBtn.addEventListener('click', () => {
-                if (video.paused) {
-                    video.play();
-                    playPauseBtn.textContent = '⏸';
-                } else {
-                    video.pause();
-                    playPauseBtn.textContent = '▶';
-                }
-            });
-
-            // Playback Speed
-            speedControl.addEventListener('change', (e) => {
-                video.playbackRate = e.target.value;
-            });
-
-            // Fullscreen API
-            fullscreenBtn.addEventListener('click', () => {
-                if (!document.fullscreenElement) {
-                    container.requestFullscreen().catch(err => console.log(err));
-                } else {
-                    document.exitFullscreen();
-                }
-            });
 
             // GSAP Fade-in
             gsap.to(modal, { opacity: 1, duration: 0.4, ease: "power2.out" });
 
-            // Force Play and attempt Fullscreen immediately
-            try {
-                await video.play();
-                await container.requestFullscreen();
-            } catch (err) {
-                console.warn("Browser blocked auto-fullscreen or auto-play without gesture:", err);
-            }
-            
-            // Destruction Logic
+            // Destruction Logic on Close
             closeBtn.addEventListener('click', () => {
-                video.pause(); 
-                if (document.fullscreenElement) document.exitFullscreen();
                 gsap.to(modal, {
                     opacity: 0,
                     duration: 0.3,
@@ -137,8 +74,8 @@ const initApp = async () => {
                 });
             });
         });
-        // ---------------------------------------------
 
+        // 2. Populate Carousel
         const carousel = document.getElementById('trending-carousel');
         videos.forEach(video => {
             const card = document.createElement('div');
@@ -151,13 +88,12 @@ const initApp = async () => {
             card.appendChild(overlay);
 
             card.addEventListener('click', () => {
-                console.log(`Play video: ${video.title}`);
                 localStorage.setItem('lastWatched', video.id);
             });
             carousel.appendChild(card);
         });
 
-        // 2. Trigger GSAP Timeline
+        // 3. Trigger GSAP Timeline
         const tl = gsap.timeline();
         const heartLoader = document.querySelector('.heart-loader');
         const heartPath = heartLoader.querySelector('path'); 
