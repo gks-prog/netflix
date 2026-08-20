@@ -176,44 +176,66 @@ body {
     transform: scale(1.05);
     z-index: 2;
 }
-/* --- Video Player Modal --- */
+/* --- Custom Video Player Modal --- */
 #video-modal {
     position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    background-color: #000000;
-    z-index: 100000; /* Must sit above everything, including the preloader z-index */
-    display: flex;
-    justify-content: center;
-    align-items: center;
+    top: 0; left: 0; width: 100vw; height: 100vh;
+    background-color: rgba(0, 0, 0, 0.95);
+    z-index: 100000;
+    display: flex; justify-content: center; align-items: center;
     opacity: 0;
 }
 
-#video-modal video {
-    width: 100%;
-    max-height: 100vh;
-    outline: none;
-    background-color: #000;
-}
-
 .close-video {
-    position: absolute;
-    top: 30px;
-    right: 40px;
-    color: rgba(255, 255, 255, 0.6);
-    font-size: 3.5rem;
-    cursor: pointer;
-    z-index: 100001;
-    transition: color 0.2s, transform 0.2s;
-    line-height: 1;
+    position: absolute; top: 30px; right: 40px;
+    color: rgba(255, 255, 255, 0.6); font-size: 3.5rem;
+    cursor: pointer; z-index: 100001; transition: color 0.2s; line-height: 1;
+}
+.close-video:hover { color: #ffffff; }
+
+.video-container {
+    position: relative; width: 85%; max-width: 1400px;
+    background: #000; border-radius: 8px; overflow: hidden;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.8);
 }
 
-.close-video:hover {
-    color: #ffffff;
-    transform: scale(1.1);
+.video-container video { width: 100%; display: block; outline: none; }
+
+.custom-controls {
+    position: absolute; bottom: 0; left: 0; width: 100%;
+    background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, transparent 100%);
+    padding: 30px 20px 15px; display: flex; flex-direction: column; gap: 10px;
+    opacity: 0; transition: opacity 0.3s ease;
 }
+
+.video-container:hover .custom-controls { opacity: 1; }
+
+#progress-bar {
+    width: 100%; cursor: pointer; height: 5px;
+    accent-color: var(--primary-red); background: rgba(255,255,255,0.3);
+    border-radius: 5px; outline: none; -webkit-appearance: none;
+}
+
+#progress-bar::-webkit-slider-thumb {
+    -webkit-appearance: none; width: 15px; height: 15px;
+    background: var(--primary-red); border-radius: 50%;
+}
+
+.control-buttons { display: flex; justify-content: space-between; align-items: center; }
+
+.control-left { display: flex; align-items: center; gap: 20px; }
+
+.control-buttons button {
+    background: none; border: none; color: white;
+    font-size: 1.5rem; cursor: pointer; transition: transform 0.1s;
+}
+.control-buttons button:hover { transform: scale(1.1); }
+
+#speed-control {
+    background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.3);
+    border-radius: 4px; padding: 4px 8px; font-size: 1rem; cursor: pointer; outline: none;
+}
+#speed-control option { background: #141414; }
 /* --- NEW: Hover Overlay Styles --- */
 .card-overlay {
     position: absolute;
