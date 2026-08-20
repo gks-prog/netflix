@@ -4,21 +4,21 @@ const fetchExternalData = async () => {
             resolve([
                 {
                     id: 1,
-                    title: "Cyberpunk City",
-                    description: "A deep dive into futuristic urban landscapes.",
+                    title: "Her",
+                    description: "A beautiful creation of the god on earth.",
                     thumbnail: "https://images.unsplash.com/photo-1515630278258-407f66498911?auto=format&fit=crop&w=1200&q=80",
                     videoUrl: "#"
                 },
                 {
                     id: 2,
-                    title: "Mountain Heights",
+                    title: "Earrings",
                     description: "Exploring the highest peaks.",
                     thumbnail: "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=800&q=80",
                     videoUrl: "#"
                 },
                 {
                     id: 3,
-                    title: "Ocean Depths",
+                    title: "Ocean like Eyes",
                     description: "Into the blue.",
                     thumbnail: "https://images.unsplash.com/photo-1582967788606-a171c1080cb0?auto=format&fit=crop&w=800&q=80",
                     videoUrl: "#"
@@ -32,7 +32,7 @@ const initApp = async () => {
     try {
         const videos = await fetchExternalData();
         
-        // 1. Build DOM Elements First
+        // 1. Build DOM Elements
         const hero = document.getElementById('hero-section');
         const heroTitle = document.getElementById('hero-title');
         const heroDesc = document.getElementById('hero-desc');
@@ -41,18 +41,49 @@ const initApp = async () => {
         heroTitle.textContent = videos[0].title;
         heroDesc.textContent = videos[0].description;
 
+        // --- Hero Play Button Logic (Video Modal) ---
+        const playBtn = document.querySelector('.play-btn');
+        playBtn.addEventListener('click', () => {
+            const modal = document.createElement('div');
+            modal.id = 'video-modal';
+            
+            const closeBtn = document.createElement('div');
+            closeBtn.className = 'close-video';
+            closeBtn.innerHTML = '&times;';
+            
+            const video = document.createElement('video');
+            video.src = 'https://storage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4';
+            video.controls = true;
+            video.autoplay = true; 
+            
+            modal.appendChild(closeBtn);
+            modal.appendChild(video);
+            document.body.appendChild(modal);
+            
+            gsap.to(modal, { opacity: 1, duration: 0.4, ease: "power2.out" });
+            
+            closeBtn.addEventListener('click', () => {
+                video.pause(); 
+                gsap.to(modal, {
+                    opacity: 0,
+                    duration: 0.3,
+                    onComplete: () => modal.remove()
+                });
+            });
+        });
+        // ---------------------------------------------
+
         const carousel = document.getElementById('trending-carousel');
         videos.forEach(video => {
             const card = document.createElement('div');
             card.className = 'card';
             card.style.backgroundImage = `url(${video.thumbnail})`;
             
-            // --- NEW: Inject Hover Overlay ---
+            // Inject Hover Overlay
             const overlay = document.createElement('div');
             overlay.className = 'card-overlay';
             overlay.textContent = 'work in progress please wait to be amused';
             card.appendChild(overlay);
-            // ---------------------------------
 
             card.addEventListener('click', () => {
                 console.log(`Play video: ${video.title}`);
@@ -61,7 +92,7 @@ const initApp = async () => {
             carousel.appendChild(card);
         });
 
-        // 2. Trigger the GSAP Timeline
+        // 2. Trigger GSAP Timeline
         const tl = gsap.timeline();
         const heartLoader = document.querySelector('.heart-loader');
         const heartPath = heartLoader.querySelector('path'); 
