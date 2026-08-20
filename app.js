@@ -6,9 +6,8 @@ const fetchExternalData = async () => {
                     id: 1,
                     title: "Her",
                     description: "A beautiful creation of the god on earth.",
-                    // CRITICAL FIX: Using Google Drive's hidden thumbnail API
                     thumbnail: "https://drive.google.com/thumbnail?id=1tsyy0OIAWh-l6q4RbzAellncKxKrwb8_&sz=w1200",
-                    videoUrl: "#" // Not used for the Drive iframe workaround
+                    videoUrl: "#" 
                 },
                 {
                     id: 2,
@@ -42,32 +41,89 @@ const initApp = async () => {
         heroTitle.textContent = videos[0].title;
         heroDesc.textContent = videos[0].description;
 
-        // --- Hero Play Button Logic (Video Modal) ---
+        // --- Hero Play Button Logic (Custom Video Player) ---
         const playBtn = document.querySelector('.play-btn');
         playBtn.addEventListener('click', () => {
             const modal = document.createElement('div');
             modal.id = 'video-modal';
             
-            const closeBtn = document.createElement('div');
-            closeBtn.className = 'close-video';
-            closeBtn.innerHTML = '&times;';
-            
-            // CRITICAL FIX: Swap <video> for <iframe> to bypass CORS block
-            const iframe = document.createElement('iframe');
-            iframe.src = 'https://drive.google.com/file/d/1EFvsfwKlmsulQEDAAJSjraLoqLmNkKzj/preview';
-            iframe.width = '80%'; // Keeps it cinematic inside the modal
-            iframe.height = '80%';
-            iframe.style.border = 'none';
-            iframe.allow = 'autoplay'; 
-            
-            modal.appendChild(closeBtn);
-            modal.appendChild(iframe);
+            // Constructing the custom UI
+            modal.innerHTML = `
+                <div class="close-video">&times;</div>
+                <div class="video-container" id="video-container">
+                    <video id="main-video" src="https://drive.google.com/uc?export=download&id=1EFvsfwKlmsulQEDAAJSjraLoqLmNkKzj" autoplay></video>
+                    <div class="custom-controls">
+                        <input type="range" id="progress-bar" value="0" min="0" max="100" step="0.1">
+                        <div class="control-buttons">
+                            <div class="control-left">
+                                <button id="play-pause">⏸</button>
+                                <select id="speed-control">
+                                    <option value="0.5">0.5x</option>
+                                    <option value="1" selected>1x Normal</option>
+                                    <option value="1.5">1.5x</option>
+                                    <option value="2">2x</option>
+                                </select>
+                            </div>
+                            <button id="fullscreen-btn">⛶</button>
+                        </div>
+                    </div>
+                </div>
+            `;
             document.body.appendChild(modal);
             
+            // Map DOM elements
+            const video = document.getElementById('main-video');
+            const container = document.getElementById('video-container');
+            const progressBar = document.getElementById('progress-bar');
+            const playPauseBtn = document.getElementById('play-pause');
+            const speedControl = document.getElementById('speed-control');
+            const fullscreenBtn = document.getElementById('fullscreen-btn');
+            const closeBtn = modal.querySelector('.close-video');
+
+            // 1. Playbar Sync (Updates slider as video plays)
+            video.addEventListener('timeupdate', () => {
+                if(video.duration) {
+                    progressBar.value = (video.currentTime / video.duration) * 100;
+                }
+            });
+
+            // 2. Seeking (Updates video when slider is dragged)
+            progressBar.addEventListener('input', (e) => {
+                video.currentTime = (e.target.value / 100) * video.duration;
+            });
+
+            // 3. Play/Pause Toggle
+            playPauseBtn.addEventListener('click', () => {
+                if (video.paused) {
+                    video.play();
+                    playPauseBtn.textContent = '⏸';
+                } else {
+                    video.pause();
+                    playPauseBtn.textContent = '▶';
+                }
+            });
+
+            // 4. Playback Speed
+            speedControl.addEventListener('change', (e) => {
+                video.playbackRate = e.target.value;
+            });
+
+            // 5. Fullscreen API
+            fullscreenBtn.addEventListener('click', () => {
+                if (!document.fullscreenElement) {
+                    container.requestFullscreen().catch(err => console.log(err));
+                } else {
+                    document.exitFullscreen();
+                }
+            });
+
+            // GSAP Fade-in
             gsap.to(modal, { opacity: 1, duration: 0.4, ease: "power2.out" });
             
+            // Destruction Logic
             closeBtn.addEventListener('click', () => {
-                // Iframe audio keeps playing if you don't destroy the node immediately
+                video.pause(); 
+                if (document.fullscreenElement) document.exitFullscreen(); // Exit FS before closing
                 gsap.to(modal, {
                     opacity: 0,
                     duration: 0.3,
@@ -75,7 +131,7 @@ const initApp = async () => {
                 });
             });
         });
-        // ---------------------------------------------
+        // ---------------------------------------------------
 
         const carousel = document.getElementById('trending-carousel');
         videos.forEach(video => {
