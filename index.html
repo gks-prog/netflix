@@ -13,7 +13,7 @@
         </svg>
     </div>
 
-    <!-- NEW: Password Lock Screen -->
+    <!-- Password Lock Screen -->
     <div id="lock-screen">
         <div class="lock-box">
             <h2>Protected Memory</h2>
@@ -44,24 +44,24 @@
             </div>
         </section>
 
-        <section class="catalog" id="catalog-section">
+        <section class="catalog scroll-reveal" id="catalog-section">
             <h3>Coming Soon</h3> 
             <div class="carousel" id="trending-carousel"></div>
         </section>
 
-        <section class="gallery-section" id="image-gallery-section">
+        <section class="gallery-section scroll-reveal" id="image-gallery-section">
             <h3>Explore 3D Space</h3>
             <div class="scene image-scene">
                 <div class="carousel-3d" id="image-carousel-3d"></div>
             </div>
         </section>
 
-        <section class="gallery-section parallax-section" id="text-gallery-section">
+        <section class="gallery-section parallax-section scroll-reveal" id="text-gallery-section">
             <h3 class="parallax-title">100 Reasons</h3>
             <div class="infinite-parallax-container" id="infinite-parallax"></div>
         </section>
 
-        <section class="gallery-section envelope-section" id="letter-section">
+        <section class="gallery-section envelope-section scroll-reveal" id="letter-section">
             <h3 class="parallax-title" style="position: relative; top: 0; margin-bottom: 80px;">A Letter For You</h3>
             <div class="envelope-wrapper">
                 <div class="envelope">
@@ -77,9 +77,17 @@
                 </div>
             </div>
         </section>
+
+        <!-- NEW: Saved Pictures Section -->
+        <section class="gallery-section scroll-reveal" id="saved-pictures-section">
+            <h3 style="margin-bottom: 40px; font-size: 1.2rem; letter-spacing: 1px;">Sorry To Save These Pictures But I Want Them</h3>
+            <div class="saved-grid" id="saved-grid">
+                <!-- Images injected via JS -->
+            </div>
+        </section>
     </main>
 
-    <!-- Full Letter Modal -->
+    <!-- Modals -->
     <div id="full-letter-modal" class="letter-modal">
         <div class="close-letter">&times;</div>
         <div class="letter-content-scroll">
@@ -129,6 +137,12 @@
             “Tum jaisi ho, waise hi mere liye bahut ho.”</p>
             <p>Always yours.<br>❤️</p>
         </div>
+    </div>
+
+    <!-- NEW: Image Lightbox Modal -->
+    <div id="image-lightbox" class="lightbox-modal">
+        <div class="close-lightbox">&times;</div>
+        <img id="lightbox-img" src="" alt="Enlarged view">
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
