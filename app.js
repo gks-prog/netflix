@@ -3,32 +3,15 @@ const fetchExternalData = async () => {
         setTimeout(() => {
             resolve([
                 {
-                    id: 1,
-                    title: "Her",
-                    description: "A beautiful creation of the god on earth.",
+                    id: 1, title: "Her", description: "A beautiful creation of the god on earth.",
                     thumbnail: "https://drive.google.com/thumbnail?id=1tsyy0OIAWh-l6q4RbzAellncKxKrwb8_&sz=w1200",
                     videoEmbedUrl: "https://drive.google.com/file/d/1EFvsfwKlmsulQEDAAJSjraLoqLmNkKzj/preview"
-                },
-                {
-                    id: 2,
-                    title: "Earrings",
-                    description: "Exploring the highest peaks.",
-                    thumbnail: "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=800&q=80",
-                    videoEmbedUrl: ""
-                },
-                {
-                    id: 3,
-                    title: "Ocean like Eyes",
-                    description: "Into the blue.",
-                    thumbnail: "https://images.unsplash.com/photo-1582967788606-a171c1080cb0?auto=format&fit=crop&w=800&q=80",
-                    videoEmbedUrl: ""
                 }
             ]);
         }, 1200); 
     });
 };
 
-// --- NEW: Injected your 7 Google Drive images using the thumbnail API ---
 const orbitalImages = [
     "https://drive.google.com/thumbnail?id=1yoGMAfJqxtYDVbGwFyfUOqksmJFjyyuV&sz=w800",
     "https://drive.google.com/thumbnail?id=1xnjGgxHiGJtyqF6A4Wwl8D2AjTE_yr1e&sz=w800",
@@ -39,143 +22,6 @@ const orbitalImages = [
     "https://drive.google.com/thumbnail?id=1pzDYoTwzqKD2wrwgIVAuYaJKfopyDjfY&sz=w800"
 ];
 
-const initApp = async () => {
-    try {
-        const videos = await fetchExternalData();
-        
-        // 1. Build Hero
-        const hero = document.getElementById('hero-section');
-        const heroTitle = document.getElementById('hero-title');
-        const heroDesc = document.getElementById('hero-desc');
-        
-        hero.style.backgroundImage = `linear-gradient(to right, rgba(20,20,20,0.9) 0%, rgba(20,20,20,0.4) 100%), url('${videos[0].thumbnail}')`;
-        heroTitle.textContent = videos[0].title;
-        heroDesc.textContent = videos[0].description;
-
-        // 2. Build Video Modal (Google Drive Embed)
-        const playBtn = document.querySelector('.play-btn');
-        playBtn.addEventListener('click', () => {
-            const modal = document.createElement('div');
-            modal.id = 'video-modal';
-            modal.style.cssText = 'position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background-color: rgba(0, 0, 0, 0.95); z-index: 100000; display: flex; justify-content: center; align-items: center; opacity: 0;';
-            
-            modal.innerHTML = `
-                <div class="close-video" style="position: absolute; top: 30px; right: 40px; color: white; font-size: 3.5rem; cursor: pointer; z-index: 100001;">&times;</div>
-                <div class="video-container" style="width: 90vw; height: 85vh; max-width: 1600px;">
-                    <iframe src="${videos[0].videoEmbedUrl}" style="width: 100%; height: 100%; border: none; border-radius: 8px;" allow="autoplay; fullscreen" allowfullscreen></iframe>
-                </div>
-            `;
-            document.body.appendChild(modal);
-
-            gsap.to(modal, { opacity: 1, duration: 0.4, ease: "power2.out" });
-
-            modal.querySelector('.close-video').addEventListener('click', () => {
-                gsap.to(modal, { opacity: 0, duration: 0.3, onComplete: () => modal.remove() });
-            });
-        });
-
-        // 3. Build Catalog Carousel
-        const carousel = document.getElementById('trending-carousel');
-        videos.forEach(video => {
-            const card = document.createElement('div');
-            card.className = 'card';
-            card.style.backgroundImage = `url('${video.thumbnail}')`;
-            
-            const overlay = document.createElement('div');
-            overlay.className = 'card-overlay';
-            overlay.textContent = 'work in progress please wait to be amused';
-            card.appendChild(overlay);
-
-            card.addEventListener('click', () => localStorage.setItem('lastWatched', video.id));
-            carousel.appendChild(card);
-        });
-
-        // 4. Build 3D Orbital Gallery
-        const carousel3d = document.getElementById('carousel-3d');
-        const radius = 450; 
-        
-        // Inject images in a circular pattern
-        orbitalImages.forEach((src, i) => {
-            const angle = (360 / orbitalImages.length) * i;
-            const item = document.createElement('div');
-            item.className = 'carousel-item';
-            item.style.transform = `rotateY(${angle}deg) translateZ(${radius}px)`;
-            item.innerHTML = `<img src="${src}" alt="Orbital Image">`;
-            carousel3d.appendChild(item);
-        });
-
-        // Orbital Drag Logic
-        let rotationY = 0;
-        let startX = 0;
-        let isDragging = false;
-        let startRotation = 0;
-        const scene = document.querySelector('.scene');
-
-        gsap.set(carousel3d, { z: -radius, rotationY: 0, transformStyle: "preserve-3d" });
-
-        scene.addEventListener('pointerdown', (e) => {
-            isDragging = true;
-            startX = e.clientX;
-            startRotation = rotationY;
-            gsap.killTweensOf(carousel3d); 
-        });
-
-        window.addEventListener('pointermove', (e) => {
-            if (!isDragging) return;
-            const deltaX = e.clientX - startX;
-            rotationY = startRotation + (deltaX * 0.4); 
-            gsap.set(carousel3d, { rotationY: rotationY });
-        });
-
-        window.addEventListener('pointerup', (e) => {
-            if (!isDragging) return;
-            isDragging = false;
-            
-            const deltaX = e.clientX - startX;
-            rotationY = startRotation + (deltaX * 0.4);
-            
-            gsap.to(carousel3d, {
-                rotationY: rotationY + (deltaX * 0.5), 
-                duration: 1.5,
-                ease: "power2.out",
-                onUpdate: () => {
-                    rotationY = gsap.getProperty(carousel3d, "rotationY");
-                }
-            });
-        });
-
-        // 5. Trigger Preloader Destruction Timeline
-        const tl = gsap.timeline();
-        const heartLoader = document.querySelector('.heart-loader');
-        const heartPath = heartLoader.querySelector('path'); 
-        const preloader = document.getElementById('preloader');
-
-        tl.to(heartLoader, {
-            scale: 50, opacity: 0, duration: 0.8, ease: "power4.in",
-            onStart: () => {
-                heartPath.style.fill = '#FFB6C1';
-                heartPath.style.stroke = 'transparent';
-                heartLoader.style.animation = 'none'; 
-            }
-        })
-        .to(preloader, { 
-            opacity: 0, duration: 0.4, ease: "power2.out",
-            onStart: () => preloader.style.pointerEvents = 'none',
-            onComplete: () => preloader.remove() 
-        }, "-=0.4")
-        .from('.navbar', { y: -80, opacity: 0, duration: 0.8, ease: "power3.out" }, "-=0.2")
-        .from('.hero-content > *', { y: 30, opacity: 0, duration: 0.8, stagger: 0.15, ease: "power3.out" }, "-=0.6")
-        .from('.card', { x: 40, opacity: 0, duration: 0.6, stagger: 0.1, ease: "back.out(1.5)" }, "-=0.4")
-        .from('.gallery-section', { opacity: 0, y: 50, duration: 1 }, "-=0.2");
-
-    } catch (error) {
-        console.error("Failed to load application data:", error);
-        document.getElementById('preloader')?.remove(); 
-    }
-};
-
-document.addEventListener('DOMContentLoaded', initApp);
-// Data for the 3D Text Helix
 const loveNotes = [
     "I love your smile.", "I love the way your eyes light up when you're happy.", "I love how deeply you feel things.",
     "I love your softness.", "I love how much you care about people.", "I love your pure intentions.",
@@ -219,73 +65,125 @@ const loveNotes = [
     "I love every version of you I've gotten to know.", "And most of all, I love you—not because of 100 reasons, but because even after trying to list them all, I still feel like I've left something out."
 ];
 
-// Inside initApp()... replace the previous orbital logic with this:
+const initApp = async () => {
+    try {
+        const videos = await fetchExternalData();
         
-        // 4. Build 3D Text Helix
-        const carousel3d = document.getElementById('carousel-3d');
-        const radius = 700; // Wider radius to accommodate 100 cards
-        const ySpread = 45; // Vertical spacing between each card
+        // 1. Hero & Modal
+        const hero = document.getElementById('hero-section');
+        hero.style.backgroundImage = `linear-gradient(to right, rgba(20,20,20,0.9) 0%, rgba(20,20,20,0.4) 100%), url('${videos[0].thumbnail}')`;
+        document.getElementById('hero-title').textContent = videos[0].title;
+        document.getElementById('hero-desc').textContent = videos[0].description;
+
+        document.querySelector('.play-btn').addEventListener('click', () => {
+            const modal = document.createElement('div');
+            modal.style.cssText = 'position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background-color: rgba(0, 0, 0, 0.95); z-index: 100000; display: flex; justify-content: center; align-items: center; opacity: 0;';
+            modal.innerHTML = `
+                <div class="close-video" style="position: absolute; top: 30px; right: 40px; color: white; font-size: 3.5rem; cursor: pointer; z-index: 100001;">&times;</div>
+                <div style="width: 90vw; height: 85vh; max-width: 1600px;">
+                    <iframe src="${videos[0].videoEmbedUrl}" style="width: 100%; height: 100%; border: none; border-radius: 8px;" allow="autoplay; fullscreen" allowfullscreen></iframe>
+                </div>
+            `;
+            document.body.appendChild(modal);
+            gsap.to(modal, { opacity: 1, duration: 0.4 });
+            modal.querySelector('.close-video').addEventListener('click', () => {
+                gsap.to(modal, { opacity: 0, duration: 0.3, onComplete: () => modal.remove() });
+            });
+        });
+
+        // 2. 3D Image Orbit Logic
+        const imageCarousel = document.getElementById('image-carousel-3d');
+        const imgRadius = 450; 
         
-        // Inject sentences in a spiral pattern
+        orbitalImages.forEach((src, i) => {
+            const angle = (360 / orbitalImages.length) * i;
+            const item = document.createElement('div');
+            item.className = 'carousel-item';
+            item.style.transform = `rotateY(${angle}deg) translateZ(${imgRadius}px)`;
+            item.innerHTML = `<img src="${src}" alt="Orbital Image">`;
+            imageCarousel.appendChild(item);
+        });
+
+        let imgRotY = 0, imgStartX = 0, imgDragging = false, imgStartRot = 0;
+        const imgScene = document.querySelector('.image-scene');
+        gsap.set(imageCarousel, { z: -imgRadius, rotationY: 0, transformStyle: "preserve-3d" });
+
+        imgScene.addEventListener('pointerdown', (e) => {
+            imgDragging = true; imgStartX = e.clientX; imgStartRot = imgRotY; gsap.killTweensOf(imageCarousel); 
+        });
+        window.addEventListener('pointermove', (e) => {
+            if (!imgDragging) return;
+            imgRotY = imgStartRot + ((e.clientX - imgStartX) * 0.4); 
+            gsap.set(imageCarousel, { rotationY: imgRotY });
+        });
+        window.addEventListener('pointerup', (e) => {
+            if (!imgDragging) return;
+            imgDragging = false;
+            gsap.to(imageCarousel, {
+                rotationY: imgRotY + ((e.clientX - imgStartX) * 0.5), duration: 1.5, ease: "power2.out",
+                onUpdate: () => imgRotY = gsap.getProperty(imageCarousel, "rotationY")
+            });
+        });
+
+        // 3. 3D Text Helix Logic
+        const textCarousel = document.getElementById('text-carousel-3d');
+        const textRadius = 700; 
+        const ySpread = 45; 
+        
         loveNotes.forEach((text, i) => {
-            const angle = i * 16; // Degrees of rotation between each card
-            const yOffset = (i - (loveNotes.length / 2)) * ySpread; // Centers the helix vertically
-            
+            const angle = i * 16; 
+            const yOffset = (i - (loveNotes.length / 2)) * ySpread; 
             const item = document.createElement('div');
             item.className = 'text-card';
-            item.style.transform = `translateY(${yOffset}px) rotateY(${angle}deg) translateZ(${radius}px)`;
+            item.style.transform = `translateY(${yOffset}px) rotateY(${angle}deg) translateZ(${textRadius}px)`;
             item.innerHTML = `<p>${text}</p>`;
-            carousel3d.appendChild(item);
+            textCarousel.appendChild(item);
         });
 
-        // Helix Drag & Scroll Logic
-        let rotationY = 0;
-        let translateY = 0;
-        let startX = 0;
-        let startY = 0;
-        let isDragging = false;
-        let startRotation = 0;
-        let startTranslation = 0;
-        const scene = document.querySelector('.scene');
+        let txtRotY = 0, txtTransY = 0, txtStartX = 0, txtStartY = 0, txtDragging = false, txtStartRot = 0, txtStartTrans = 0;
+        const txtScene = document.querySelector('.text-scene');
+        gsap.set(textCarousel, { z: -textRadius, rotationY: 0, y: 0, transformStyle: "preserve-3d" });
 
-        gsap.set(carousel3d, { z: -radius, rotationY: 0, y: 0, transformStyle: "preserve-3d" });
-
-        scene.addEventListener('pointerdown', (e) => {
-            isDragging = true;
-            startX = e.clientX;
-            startY = e.clientY;
-            startRotation = rotationY;
-            startTranslation = translateY;
-            gsap.killTweensOf(carousel3d); 
+        txtScene.addEventListener('pointerdown', (e) => {
+            txtDragging = true; txtStartX = e.clientX; txtStartY = e.clientY; 
+            txtStartRot = txtRotY; txtStartTrans = txtTransY; gsap.killTweensOf(textCarousel); 
         });
-
         window.addEventListener('pointermove', (e) => {
-            if (!isDragging) return;
-            const deltaX = e.clientX - startX;
-            const deltaY = e.clientY - startY;
-            
-            rotationY = startRotation + (deltaX * 0.3); // Horizontal drag spins it
-            translateY = startTranslation + (deltaY * 1.5); // Vertical drag moves it up/down
-            
-            gsap.set(carousel3d, { rotationY: rotationY, y: translateY });
+            if (!txtDragging) return;
+            txtRotY = txtStartRot + ((e.clientX - txtStartX) * 0.3); 
+            txtTransY = txtStartTrans + ((e.clientY - txtStartY) * 1.5); 
+            gsap.set(textCarousel, { rotationY: txtRotY, y: txtTransY });
         });
-
         window.addEventListener('pointerup', (e) => {
-            if (!isDragging) return;
-            isDragging = false;
-            
-            const deltaX = e.clientX - startX;
-            const deltaY = e.clientY - startY;
-            
-            // Add momentum glide
-            gsap.to(carousel3d, {
-                rotationY: rotationY + (deltaX * 0.4), 
-                y: translateY + (deltaY * 1.2),
-                duration: 1.5,
-                ease: "power2.out",
+            if (!txtDragging) return;
+            txtDragging = false;
+            gsap.to(textCarousel, {
+                rotationY: txtRotY + ((e.clientX - txtStartX) * 0.4), 
+                y: txtTransY + ((e.clientY - txtStartY) * 1.2),
+                duration: 1.5, ease: "power2.out",
                 onUpdate: () => {
-                    rotationY = gsap.getProperty(carousel3d, "rotationY");
-                    translateY = gsap.getProperty(carousel3d, "y");
+                    txtRotY = gsap.getProperty(textCarousel, "rotationY");
+                    txtTransY = gsap.getProperty(textCarousel, "y");
                 }
             });
         });
+
+        // 4. Preloader Destruction
+        const tl = gsap.timeline();
+        const heartLoader = document.querySelector('.heart-loader');
+        const heartPath = heartLoader.querySelector('path'); 
+        const preloader = document.getElementById('preloader');
+
+        tl.to(heartLoader, { scale: 50, opacity: 0, duration: 0.8, ease: "power4.in", onStart: () => { heartPath.style.fill = '#FFB6C1'; heartPath.style.stroke = 'transparent'; heartLoader.style.animation = 'none'; }})
+        .to(preloader, { opacity: 0, duration: 0.4, ease: "power2.out", onStart: () => preloader.style.pointerEvents = 'none', onComplete: () => preloader.remove() }, "-=0.4")
+        .from('.navbar', { y: -80, opacity: 0, duration: 0.8, ease: "power3.out" }, "-=0.2")
+        .from('.hero-content > *', { y: 30, opacity: 0, duration: 0.8, stagger: 0.15, ease: "power3.out" }, "-=0.6")
+        .from('.gallery-section', { opacity: 0, y: 50, duration: 1, stagger: 0.2 }, "-=0.2");
+
+    } catch (error) {
+        console.error("Failed to load application data:", error);
+        document.getElementById('preloader')?.remove(); 
+    }
+};
+
+document.addEventListener('DOMContentLoaded', initApp);
