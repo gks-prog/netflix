@@ -6,6 +6,16 @@ const fetchExternalData = async () => {
                     id: 1, title: "Her", description: "A beautiful creation of the god on earth.",
                     thumbnail: "https://drive.google.com/thumbnail?id=1tsyy0OIAWh-l6q4RbzAellncKxKrwb8_&sz=w1200",
                     videoEmbedUrl: "https://drive.google.com/file/d/1EFvsfwKlmsulQEDAAJSjraLoqLmNkKzj/preview"
+                },
+                {
+                    id: 2, title: "Earrings", description: "Exploring the highest peaks.",
+                    thumbnail: "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=800&q=80",
+                    videoEmbedUrl: ""
+                },
+                {
+                    id: 3, title: "Ocean like Eyes", description: "Into the blue.",
+                    thumbnail: "https://images.unsplash.com/photo-1582967788606-a171c1080cb0?auto=format&fit=crop&w=800&q=80",
+                    videoEmbedUrl: ""
                 }
             ]);
         }, 1200); 
@@ -67,15 +77,35 @@ const loveNotes = [
 
 const initApp = async () => {
     try {
+        // --- 0. Background Music Engine ---
+        // Integrated specific Cloudinary Audio Track
+        const bgm = new Audio('https://res.cloudinary.com/pbekirv1/video/upload/v1787314732/Navjot_Ahuja_-_Khat_Official_Audio.mp3');
+        bgm.loop = true;
+        bgm.volume = 0; 
+        let bgmStarted = false;
+
+        window.addEventListener('pointerdown', () => {
+            if (!bgmStarted) {
+                bgmStarted = true;
+                bgm.play().then(() => {
+                    // Fade up to 20% volume
+                    gsap.to(bgm, { volume: 0.2, duration: 3, ease: "power2.inOut" });
+                }).catch(err => console.warn("Audio autoplay blocked by browser.", err));
+            }
+        }, { once: true });
+
+
+        // --- 1. Fetch & Build Hero ---
         const videos = await fetchExternalData();
-        
-        // 1. Hero & Modal
         const hero = document.getElementById('hero-section');
         hero.style.backgroundImage = `linear-gradient(to right, rgba(20,20,20,0.9) 0%, rgba(20,20,20,0.4) 100%), url('${videos[0].thumbnail}')`;
         document.getElementById('hero-title').textContent = videos[0].title;
         document.getElementById('hero-desc').textContent = videos[0].description;
 
         document.querySelector('.play-btn').addEventListener('click', () => {
+            // Fade out BGM
+            if (bgmStarted) gsap.to(bgm, { volume: 0, duration: 1, onComplete: () => bgm.pause() });
+
             const modal = document.createElement('div');
             modal.style.cssText = 'position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background-color: rgba(0, 0, 0, 0.95); z-index: 100000; display: flex; justify-content: center; align-items: center; opacity: 0;';
             modal.innerHTML = `
@@ -86,12 +116,34 @@ const initApp = async () => {
             `;
             document.body.appendChild(modal);
             gsap.to(modal, { opacity: 1, duration: 0.4 });
+            
             modal.querySelector('.close-video').addEventListener('click', () => {
                 gsap.to(modal, { opacity: 0, duration: 0.3, onComplete: () => modal.remove() });
+                // Fade BGM back in
+                if (bgmStarted) {
+                    bgm.play();
+                    gsap.to(bgm, { volume: 0.2, duration: 1.5 });
+                }
             });
         });
 
-        // 2. 3D Image Orbit Logic
+        // --- 2. Catalog Section ---
+        const carousel = document.getElementById('trending-carousel');
+        videos.forEach(video => {
+            const card = document.createElement('div');
+            card.className = 'card';
+            card.style.backgroundImage = `url('${video.thumbnail}')`;
+            
+            const overlay = document.createElement('div');
+            overlay.className = 'card-overlay';
+            overlay.textContent = 'work in progress please wait to be amused';
+            card.appendChild(overlay);
+
+            card.addEventListener('click', () => localStorage.setItem('lastWatched', video.id));
+            carousel.appendChild(card);
+        });
+
+        // --- 3. 3D Image Orbit ---
         const imageCarousel = document.getElementById('image-carousel-3d');
         const imgRadius = 450; 
         
@@ -108,8 +160,13 @@ const initApp = async () => {
         const imgScene = document.querySelector('.image-scene');
         gsap.set(imageCarousel, { z: -imgRadius, rotationY: 0, transformStyle: "preserve-3d" });
 
+        let autoRotate = gsap.to(imageCarousel, { rotationY: "+=360", duration: 60, repeat: -1, ease: "none" });
+
         imgScene.addEventListener('pointerdown', (e) => {
-            imgDragging = true; imgStartX = e.clientX; imgStartRot = imgRotY; gsap.killTweensOf(imageCarousel); 
+            imgDragging = true; imgStartX = e.clientX; 
+            imgStartRot = gsap.getProperty(imageCarousel, "rotationY"); 
+            autoRotate.pause(); 
+            gsap.killTweensOf(imageCarousel); 
         });
         window.addEventListener('pointermove', (e) => {
             if (!imgDragging) return;
@@ -121,103 +178,68 @@ const initApp = async () => {
             imgDragging = false;
             gsap.to(imageCarousel, {
                 rotationY: imgRotY + ((e.clientX - imgStartX) * 0.5), duration: 1.5, ease: "power2.out",
-                onUpdate: () => imgRotY = gsap.getProperty(imageCarousel, "rotationY")
+                onComplete: () => autoRotate.progress(0).play()
             });
         });
 
-       // 3. Build Infinite Parallax Text Gallery
+        // --- 4. Infinite Parallax Text ---
         const parallaxContainer = document.getElementById('infinite-parallax');
-        const gridW = 4000; // The virtual width of our infinite universe
-        const gridH = 4000; // The virtual height
+        const gridW = 4000; 
+        const gridH = 4000; 
         const cardsData = [];
 
-        // Generate the universe of cards
-        loveNotes.forEach((text, i) => {
+        loveNotes.forEach((text) => {
             const card = document.createElement('div');
             card.className = 'parallax-card';
             card.innerHTML = `<p>${text}</p>`;
             parallaxContainer.appendChild(card);
 
-            // Randomize position, depth, and size for parallax effect
-            const depth = Math.random(); // 0 (background) to 1 (foreground)
-            const speed = 0.5 + (depth * 1.5); // Foreground moves faster
-            const scale = 0.6 + (depth * 0.6); // Foreground is larger
-            const opacity = 0.3 + (depth * 0.7); // Background is faded
-            
-            // Random base coordinates within the virtual grid
+            const depth = Math.random(); 
+            const speed = 0.5 + (depth * 1.5); 
+            const scale = 0.6 + (depth * 0.6); 
+            const opacity = 0.3 + (depth * 0.7); 
             const baseX = Math.random() * gridW;
             const baseY = Math.random() * gridH;
 
-            // Store physics data on the element
             cardsData.push({ el: card, baseX, baseY, speed, scale, opacity });
-            
-            // Apply static styling
             gsap.set(card, { scale: scale, opacity: opacity, transformOrigin: "center center" });
         });
 
-        // Parallax Drag Logic
-        let panX = 0, panY = 0;
-        let pStartX = 0, pStartY = 0;
-        let pDragging = false;
-
+        let panX = 0, panY = 0, pStartX = 0, pStartY = 0, pDragging = false;
         parallaxContainer.addEventListener('pointerdown', (e) => {
-            pDragging = true;
-            pStartX = e.clientX - panX;
-            pStartY = e.clientY - panY;
-            gsap.killTweensOf(window); // Stop glide momentum
+            pDragging = true; pStartX = e.clientX - panX; pStartY = e.clientY - panY;
+            gsap.killTweensOf(window); 
         });
-
         window.addEventListener('pointermove', (e) => {
             if (!pDragging) return;
-            panX = e.clientX - pStartX;
-            panY = e.clientY - pStartY;
+            panX = e.clientX - pStartX; panY = e.clientY - pStartY;
             updateParallax();
         });
-
         window.addEventListener('pointerup', (e) => {
             if (!pDragging) return;
             pDragging = false;
-            
-            // Momentum glide based on velocity
             const deltaX = e.clientX - (pStartX + panX);
             const deltaY = e.clientY - (pStartY + panY);
-            
             gsap.to(window, {
-                duration: 1.5,
-                ease: "power2.out",
-                onUpdate: () => {
-                    panX += deltaX * 0.1;
-                    panY += deltaY * 0.1;
-                    updateParallax();
-                }
+                duration: 1.5, ease: "power2.out",
+                onUpdate: () => { panX += deltaX * 0.1; panY += deltaY * 0.1; updateParallax(); }
             });
         });
 
-        // The core rendering engine for the infinite wrap
         function updateParallax() {
             const cx = window.innerWidth / 2;
             const cy = window.innerHeight / 2;
-
             cardsData.forEach(card => {
-                // Apply drag offset multiplied by the card's specific parallax speed
                 let currentX = card.baseX + (panX * card.speed);
                 let currentY = card.baseY + (panY * card.speed);
-
-                // Mathematical Infinite Wrap: Keeps the card inside the virtual grid
                 let wrappedX = ((currentX % gridW) + gridW) % gridW;
                 let wrappedY = ((currentY % gridH) + gridH) % gridH;
-
-                // Center the virtual grid around the user's screen
-                let renderX = wrappedX - (gridW / 2) + cx;
-                let renderY = wrappedY - (gridH / 2) + cy;
-
-                gsap.set(card.el, { x: renderX, y: renderY });
+                gsap.set(card.el, { x: wrappedX - (gridW / 2) + cx, y: wrappedY - (gridH / 2) + cy });
             });
         }
-        
-        // Initial render
         updateParallax();
-        // 4. Preloader Destruction
+
+        // --- 5. Preloader Destruction ---
         const tl = gsap.timeline();
         const heartLoader = document.querySelector('.heart-loader');
         const heartPath = heartLoader.querySelector('path'); 
@@ -227,7 +249,7 @@ const initApp = async () => {
         .to(preloader, { opacity: 0, duration: 0.4, ease: "power2.out", onStart: () => preloader.style.pointerEvents = 'none', onComplete: () => preloader.remove() }, "-=0.4")
         .from('.navbar', { y: -80, opacity: 0, duration: 0.8, ease: "power3.out" }, "-=0.2")
         .from('.hero-content > *', { y: 30, opacity: 0, duration: 0.8, stagger: 0.15, ease: "power3.out" }, "-=0.6")
-        .from('.gallery-section', { opacity: 0, y: 50, duration: 1, stagger: 0.2 }, "-=0.2");
+        .from('.catalog, .gallery-section', { opacity: 0, y: 50, duration: 1, stagger: 0.2 }, "-=0.2");
 
     } catch (error) {
         console.error("Failed to load application data:", error);
