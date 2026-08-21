@@ -6,6 +6,17 @@ const fetchExternalData = async () => {
                     id: 1, title: "Her", description: "A beautiful creation of the god on earth.",
                     thumbnail: "https://drive.google.com/thumbnail?id=1tsyy0OIAWh-l6q4RbzAellncKxKrwb8_&sz=w1200",
                     videoEmbedUrl: "https://drive.google.com/file/d/1EFvsfwKlmsulQEDAAJSjraLoqLmNkKzj/preview"
+                },
+                // RESTORED: These objects populate the "Coming Soon" section
+                {
+                    id: 2, title: "Earrings", description: "Exploring the highest peaks.",
+                    thumbnail: "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=800&q=80",
+                    videoEmbedUrl: ""
+                },
+                {
+                    id: 3, title: "Ocean like Eyes", description: "Into the blue.",
+                    thumbnail: "https://images.unsplash.com/photo-1582967788606-a171c1080cb0?auto=format&fit=crop&w=800&q=80",
+                    videoEmbedUrl: ""
                 }
             ]);
         }, 1200); 
@@ -65,6 +76,43 @@ const loveNotes = [
     "I love every version of you I've gotten to know.", "And most of all, I love you—not because of 100 reasons, but because even after trying to list them all, I still feel like I've left something out."
 ];
 
+// NEW: Particle Engine
+function spawnParticles() {
+    const emojis = ['🌸', '🌺', '❤️', '💖', '✨'];
+    const envelopeRect = document.querySelector('.envelope-wrapper').getBoundingClientRect();
+    const startX = envelopeRect.left + (envelopeRect.width / 2);
+    const startY = envelopeRect.top + (envelopeRect.height / 2);
+
+    for (let i = 0; i < 60; i++) {
+        const p = document.createElement('div');
+        p.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+        p.className = 'particle';
+        document.body.appendChild(p);
+
+        gsap.set(p, { x: startX, y: startY, fontSize: (Math.random() * 20 + 15) + 'px', opacity: 1 });
+
+        const angle = Math.random() * Math.PI * 2;
+        const velocity = 150 + Math.random() * 250;
+        
+        gsap.to(p, {
+            x: startX + Math.cos(angle) * velocity,
+            y: startY + Math.sin(angle) * velocity - 100, 
+            rotation: Math.random() * 360 - 180,
+            duration: 1 + Math.random() * 0.5,
+            ease: "power2.out",
+            onComplete: () => {
+                gsap.to(p, {
+                    y: window.innerHeight + 100,
+                    duration: 1.5 + Math.random(),
+                    ease: "power1.in",
+                    opacity: 0,
+                    onComplete: () => p.remove()
+                });
+            }
+        });
+    }
+}
+
 const initApp = async () => {
     try {
         // --- 0. Background Music Engine ---
@@ -100,6 +148,22 @@ const initApp = async () => {
                 gsap.to(modal, { opacity: 0, duration: 0.3, onComplete: () => modal.remove() });
                 if (bgmStarted) { bgm.play(); gsap.to(bgm, { volume: 0.2, duration: 1.5 }); }
             });
+        });
+
+        // --- 2. Catalog Section ---
+        const carousel = document.getElementById('trending-carousel');
+        videos.forEach(video => {
+            const card = document.createElement('div');
+            card.className = 'card';
+            card.style.backgroundImage = `url('${video.thumbnail}')`;
+            
+            const overlay = document.createElement('div');
+            overlay.className = 'card-overlay';
+            overlay.textContent = 'work in progress please wait to be amused';
+            card.appendChild(overlay);
+
+            card.addEventListener('click', () => localStorage.setItem('lastWatched', video.id));
+            carousel.appendChild(card);
         });
 
         // --- 3. 3D Image Orbit ---
@@ -179,7 +243,7 @@ const initApp = async () => {
         }
         updateParallax();
 
-        // --- NEW 5: Envelope & Letter Logic ---
+        // --- 5: Envelope & Letter Logic ---
         const envelopeWrapper = document.querySelector('.envelope-wrapper');
         const flap = document.querySelector('.flap');
         const heartSeal = document.querySelector('.heart-seal');
@@ -192,12 +256,18 @@ const initApp = async () => {
         envelopeWrapper.addEventListener('click', () => {
             if (!envelopeOpen) {
                 envelopeOpen = true;
+                
+                // Explode Particles
+                spawnParticles();
+
+                // Open Envelope Timeline
                 const tl = gsap.timeline();
                 tl.to(heartSeal, { scale: 0, opacity: 0, duration: 0.3 })
                   .to(flap, { rotateX: 180, duration: 0.6, ease: "power2.inOut" })
+                  // CRITICAL FIX: Pushes the flap behind the letter once opened
+                  .set(flap, { zIndex: 1 }) 
                   .to(letterPreview, { y: -80, duration: 0.5, ease: "back.out(1.2)" });
             } else {
-                // Second click opens the full screen readable letter
                 gsap.to(letterModal, { opacity: 1, duration: 0.4, onStart: () => letterModal.style.pointerEvents = 'auto' });
             }
         });
