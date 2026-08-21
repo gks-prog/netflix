@@ -6,16 +6,6 @@ const fetchExternalData = async () => {
                     id: 1, title: "Her", description: "A beautiful creation of the god on earth.",
                     thumbnail: "https://drive.google.com/thumbnail?id=1tsyy0OIAWh-l6q4RbzAellncKxKrwb8_&sz=w1200",
                     videoEmbedUrl: "https://drive.google.com/file/d/1EFvsfwKlmsulQEDAAJSjraLoqLmNkKzj/preview"
-                },
-                {
-                    id: 2, title: "Earrings", description: "Exploring the highest peaks.",
-                    thumbnail: "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=800&q=80",
-                    videoEmbedUrl: ""
-                },
-                {
-                    id: 3, title: "Ocean like Eyes", description: "Into the blue.",
-                    thumbnail: "https://images.unsplash.com/photo-1582967788606-a171c1080cb0?auto=format&fit=crop&w=800&q=80",
-                    videoEmbedUrl: ""
                 }
             ]);
         }, 1200); 
@@ -78,22 +68,17 @@ const loveNotes = [
 const initApp = async () => {
     try {
         // --- 0. Background Music Engine ---
-        // Integrated specific Cloudinary Audio Track
         const bgm = new Audio('https://res.cloudinary.com/pbekirv1/video/upload/v1787314732/Navjot_Ahuja_-_Khat_Official_Audio.mp3');
-        bgm.loop = true;
-        bgm.volume = 0; 
-        let bgmStarted = false;
+        bgm.loop = true; bgm.volume = 0; let bgmStarted = false;
 
         window.addEventListener('pointerdown', () => {
             if (!bgmStarted) {
                 bgmStarted = true;
                 bgm.play().then(() => {
-                    // Fade up to 20% volume
                     gsap.to(bgm, { volume: 0.2, duration: 3, ease: "power2.inOut" });
-                }).catch(err => console.warn("Audio autoplay blocked by browser.", err));
+                }).catch(err => console.warn("Audio autoplay blocked.", err));
             }
         }, { once: true });
-
 
         // --- 1. Fetch & Build Hero ---
         const videos = await fetchExternalData();
@@ -103,44 +88,18 @@ const initApp = async () => {
         document.getElementById('hero-desc').textContent = videos[0].description;
 
         document.querySelector('.play-btn').addEventListener('click', () => {
-            // Fade out BGM
             if (bgmStarted) gsap.to(bgm, { volume: 0, duration: 1, onComplete: () => bgm.pause() });
 
             const modal = document.createElement('div');
             modal.style.cssText = 'position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background-color: rgba(0, 0, 0, 0.95); z-index: 100000; display: flex; justify-content: center; align-items: center; opacity: 0;';
-            modal.innerHTML = `
-                <div class="close-video" style="position: absolute; top: 30px; right: 40px; color: white; font-size: 3.5rem; cursor: pointer; z-index: 100001;">&times;</div>
-                <div style="width: 90vw; height: 85vh; max-width: 1600px;">
-                    <iframe src="${videos[0].videoEmbedUrl}" style="width: 100%; height: 100%; border: none; border-radius: 8px;" allow="autoplay; fullscreen" allowfullscreen></iframe>
-                </div>
-            `;
+            modal.innerHTML = `<div class="close-video" style="position: absolute; top: 30px; right: 40px; color: white; font-size: 3.5rem; cursor: pointer; z-index: 100001;">&times;</div><div style="width: 90vw; height: 85vh; max-width: 1600px;"><iframe src="${videos[0].videoEmbedUrl}" style="width: 100%; height: 100%; border: none; border-radius: 8px;" allow="autoplay; fullscreen" allowfullscreen></iframe></div>`;
             document.body.appendChild(modal);
             gsap.to(modal, { opacity: 1, duration: 0.4 });
             
             modal.querySelector('.close-video').addEventListener('click', () => {
                 gsap.to(modal, { opacity: 0, duration: 0.3, onComplete: () => modal.remove() });
-                // Fade BGM back in
-                if (bgmStarted) {
-                    bgm.play();
-                    gsap.to(bgm, { volume: 0.2, duration: 1.5 });
-                }
+                if (bgmStarted) { bgm.play(); gsap.to(bgm, { volume: 0.2, duration: 1.5 }); }
             });
-        });
-
-        // --- 2. Catalog Section ---
-        const carousel = document.getElementById('trending-carousel');
-        videos.forEach(video => {
-            const card = document.createElement('div');
-            card.className = 'card';
-            card.style.backgroundImage = `url('${video.thumbnail}')`;
-            
-            const overlay = document.createElement('div');
-            overlay.className = 'card-overlay';
-            overlay.textContent = 'work in progress please wait to be amused';
-            card.appendChild(overlay);
-
-            card.addEventListener('click', () => localStorage.setItem('lastWatched', video.id));
-            carousel.appendChild(card);
         });
 
         // --- 3. 3D Image Orbit ---
@@ -165,8 +124,7 @@ const initApp = async () => {
         imgScene.addEventListener('pointerdown', (e) => {
             imgDragging = true; imgStartX = e.clientX; 
             imgStartRot = gsap.getProperty(imageCarousel, "rotationY"); 
-            autoRotate.pause(); 
-            gsap.killTweensOf(imageCarousel); 
+            autoRotate.pause(); gsap.killTweensOf(imageCarousel); 
         });
         window.addEventListener('pointermove', (e) => {
             if (!imgDragging) return;
@@ -176,70 +134,79 @@ const initApp = async () => {
         window.addEventListener('pointerup', (e) => {
             if (!imgDragging) return;
             imgDragging = false;
-            gsap.to(imageCarousel, {
-                rotationY: imgRotY + ((e.clientX - imgStartX) * 0.5), duration: 1.5, ease: "power2.out",
-                onComplete: () => autoRotate.progress(0).play()
-            });
+            gsap.to(imageCarousel, { rotationY: imgRotY + ((e.clientX - imgStartX) * 0.5), duration: 1.5, ease: "power2.out", onComplete: () => autoRotate.progress(0).play() });
         });
 
         // --- 4. Infinite Parallax Text ---
         const parallaxContainer = document.getElementById('infinite-parallax');
-        const gridW = 4000; 
-        const gridH = 4000; 
-        const cardsData = [];
+        const gridW = 4000, gridH = 4000; const cardsData = [];
 
         loveNotes.forEach((text) => {
             const card = document.createElement('div');
             card.className = 'parallax-card';
             card.innerHTML = `<p>${text}</p>`;
             parallaxContainer.appendChild(card);
-
             const depth = Math.random(); 
             const speed = 0.5 + (depth * 1.5); 
             const scale = 0.6 + (depth * 0.6); 
             const opacity = 0.3 + (depth * 0.7); 
-            const baseX = Math.random() * gridW;
-            const baseY = Math.random() * gridH;
-
+            const baseX = Math.random() * gridW; const baseY = Math.random() * gridH;
             cardsData.push({ el: card, baseX, baseY, speed, scale, opacity });
             gsap.set(card, { scale: scale, opacity: opacity, transformOrigin: "center center" });
         });
 
         let panX = 0, panY = 0, pStartX = 0, pStartY = 0, pDragging = false;
         parallaxContainer.addEventListener('pointerdown', (e) => {
-            pDragging = true; pStartX = e.clientX - panX; pStartY = e.clientY - panY;
-            gsap.killTweensOf(window); 
+            pDragging = true; pStartX = e.clientX - panX; pStartY = e.clientY - panY; gsap.killTweensOf(window); 
         });
         window.addEventListener('pointermove', (e) => {
             if (!pDragging) return;
-            panX = e.clientX - pStartX; panY = e.clientY - pStartY;
-            updateParallax();
+            panX = e.clientX - pStartX; panY = e.clientY - pStartY; updateParallax();
         });
         window.addEventListener('pointerup', (e) => {
             if (!pDragging) return;
             pDragging = false;
-            const deltaX = e.clientX - (pStartX + panX);
-            const deltaY = e.clientY - (pStartY + panY);
-            gsap.to(window, {
-                duration: 1.5, ease: "power2.out",
-                onUpdate: () => { panX += deltaX * 0.1; panY += deltaY * 0.1; updateParallax(); }
-            });
+            gsap.to(window, { duration: 1.5, ease: "power2.out", onUpdate: () => { panX += (e.clientX - (pStartX + panX)) * 0.1; panY += (e.clientY - (pStartY + panY)) * 0.1; updateParallax(); } });
         });
 
         function updateParallax() {
-            const cx = window.innerWidth / 2;
-            const cy = window.innerHeight / 2;
+            const cx = window.innerWidth / 2; const cy = window.innerHeight / 2;
             cardsData.forEach(card => {
-                let currentX = card.baseX + (panX * card.speed);
-                let currentY = card.baseY + (panY * card.speed);
-                let wrappedX = ((currentX % gridW) + gridW) % gridW;
-                let wrappedY = ((currentY % gridH) + gridH) % gridH;
+                let currentX = card.baseX + (panX * card.speed); let currentY = card.baseY + (panY * card.speed);
+                let wrappedX = ((currentX % gridW) + gridW) % gridW; let wrappedY = ((currentY % gridH) + gridH) % gridH;
                 gsap.set(card.el, { x: wrappedX - (gridW / 2) + cx, y: wrappedY - (gridH / 2) + cy });
             });
         }
         updateParallax();
 
-        // --- 5. Preloader Destruction ---
+        // --- NEW 5: Envelope & Letter Logic ---
+        const envelopeWrapper = document.querySelector('.envelope-wrapper');
+        const flap = document.querySelector('.flap');
+        const heartSeal = document.querySelector('.heart-seal');
+        const letterPreview = document.getElementById('letter-preview');
+        const letterModal = document.getElementById('full-letter-modal');
+        const closeLetterBtn = document.querySelector('.close-letter');
+        
+        let envelopeOpen = false;
+
+        envelopeWrapper.addEventListener('click', () => {
+            if (!envelopeOpen) {
+                envelopeOpen = true;
+                const tl = gsap.timeline();
+                tl.to(heartSeal, { scale: 0, opacity: 0, duration: 0.3 })
+                  .to(flap, { rotateX: 180, duration: 0.6, ease: "power2.inOut" })
+                  .to(letterPreview, { y: -80, duration: 0.5, ease: "back.out(1.2)" });
+            } else {
+                // Second click opens the full screen readable letter
+                gsap.to(letterModal, { opacity: 1, duration: 0.4, onStart: () => letterModal.style.pointerEvents = 'auto' });
+            }
+        });
+
+        closeLetterBtn.addEventListener('click', () => {
+            gsap.to(letterModal, { opacity: 0, duration: 0.3, onComplete: () => letterModal.style.pointerEvents = 'none' });
+        });
+
+        // --- 6. Preloader Destruction ---
         const tl = gsap.timeline();
         const heartLoader = document.querySelector('.heart-loader');
         const heartPath = heartLoader.querySelector('path'); 
