@@ -125,49 +125,98 @@ const initApp = async () => {
             });
         });
 
-        // 3. 3D Text Helix Logic
-        const textCarousel = document.getElementById('text-carousel-3d');
-        const textRadius = 700; 
-        const ySpread = 45; 
-        
+       // 3. Build Infinite Parallax Text Gallery
+        const parallaxContainer = document.getElementById('infinite-parallax');
+        const gridW = 4000; // The virtual width of our infinite universe
+        const gridH = 4000; // The virtual height
+        const cardsData = [];
+
+        // Generate the universe of cards
         loveNotes.forEach((text, i) => {
-            const angle = i * 16; 
-            const yOffset = (i - (loveNotes.length / 2)) * ySpread; 
-            const item = document.createElement('div');
-            item.className = 'text-card';
-            item.style.transform = `translateY(${yOffset}px) rotateY(${angle}deg) translateZ(${textRadius}px)`;
-            item.innerHTML = `<p>${text}</p>`;
-            textCarousel.appendChild(item);
+            const card = document.createElement('div');
+            card.className = 'parallax-card';
+            card.innerHTML = `<p>${text}</p>`;
+            parallaxContainer.appendChild(card);
+
+            // Randomize position, depth, and size for parallax effect
+            const depth = Math.random(); // 0 (background) to 1 (foreground)
+            const speed = 0.5 + (depth * 1.5); // Foreground moves faster
+            const scale = 0.6 + (depth * 0.6); // Foreground is larger
+            const opacity = 0.3 + (depth * 0.7); // Background is faded
+            
+            // Random base coordinates within the virtual grid
+            const baseX = Math.random() * gridW;
+            const baseY = Math.random() * gridH;
+
+            // Store physics data on the element
+            cardsData.push({ el: card, baseX, baseY, speed, scale, opacity });
+            
+            // Apply static styling
+            gsap.set(card, { scale: scale, opacity: opacity, transformOrigin: "center center" });
         });
 
-        let txtRotY = 0, txtTransY = 0, txtStartX = 0, txtStartY = 0, txtDragging = false, txtStartRot = 0, txtStartTrans = 0;
-        const txtScene = document.querySelector('.text-scene');
-        gsap.set(textCarousel, { z: -textRadius, rotationY: 0, y: 0, transformStyle: "preserve-3d" });
+        // Parallax Drag Logic
+        let panX = 0, panY = 0;
+        let pStartX = 0, pStartY = 0;
+        let pDragging = false;
 
-        txtScene.addEventListener('pointerdown', (e) => {
-            txtDragging = true; txtStartX = e.clientX; txtStartY = e.clientY; 
-            txtStartRot = txtRotY; txtStartTrans = txtTransY; gsap.killTweensOf(textCarousel); 
+        parallaxContainer.addEventListener('pointerdown', (e) => {
+            pDragging = true;
+            pStartX = e.clientX - panX;
+            pStartY = e.clientY - panY;
+            gsap.killTweensOf(window); // Stop glide momentum
         });
+
         window.addEventListener('pointermove', (e) => {
-            if (!txtDragging) return;
-            txtRotY = txtStartRot + ((e.clientX - txtStartX) * 0.3); 
-            txtTransY = txtStartTrans + ((e.clientY - txtStartY) * 1.5); 
-            gsap.set(textCarousel, { rotationY: txtRotY, y: txtTransY });
+            if (!pDragging) return;
+            panX = e.clientX - pStartX;
+            panY = e.clientY - pStartY;
+            updateParallax();
         });
+
         window.addEventListener('pointerup', (e) => {
-            if (!txtDragging) return;
-            txtDragging = false;
-            gsap.to(textCarousel, {
-                rotationY: txtRotY + ((e.clientX - txtStartX) * 0.4), 
-                y: txtTransY + ((e.clientY - txtStartY) * 1.2),
-                duration: 1.5, ease: "power2.out",
+            if (!pDragging) return;
+            pDragging = false;
+            
+            // Momentum glide based on velocity
+            const deltaX = e.clientX - (pStartX + panX);
+            const deltaY = e.clientY - (pStartY + panY);
+            
+            gsap.to(window, {
+                duration: 1.5,
+                ease: "power2.out",
                 onUpdate: () => {
-                    txtRotY = gsap.getProperty(textCarousel, "rotationY");
-                    txtTransY = gsap.getProperty(textCarousel, "y");
+                    panX += deltaX * 0.1;
+                    panY += deltaY * 0.1;
+                    updateParallax();
                 }
             });
         });
 
+        // The core rendering engine for the infinite wrap
+        function updateParallax() {
+            const cx = window.innerWidth / 2;
+            const cy = window.innerHeight / 2;
+
+            cardsData.forEach(card => {
+                // Apply drag offset multiplied by the card's specific parallax speed
+                let currentX = card.baseX + (panX * card.speed);
+                let currentY = card.baseY + (panY * card.speed);
+
+                // Mathematical Infinite Wrap: Keeps the card inside the virtual grid
+                let wrappedX = ((currentX % gridW) + gridW) % gridW;
+                let wrappedY = ((currentY % gridH) + gridH) % gridH;
+
+                // Center the virtual grid around the user's screen
+                let renderX = wrappedX - (gridW / 2) + cx;
+                let renderY = wrappedY - (gridH / 2) + cy;
+
+                gsap.set(card.el, { x: renderX, y: renderY });
+            });
+        }
+        
+        // Initial render
+        updateParallax();
         // 4. Preloader Destruction
         const tl = gsap.timeline();
         const heartLoader = document.querySelector('.heart-loader');
