@@ -7,7 +7,6 @@ const fetchExternalData = async () => {
                     thumbnail: "https://drive.google.com/thumbnail?id=1tsyy0OIAWh-l6q4RbzAellncKxKrwb8_&sz=w1200",
                     videoEmbedUrl: "https://drive.google.com/file/d/1EFvsfwKlmsulQEDAAJSjraLoqLmNkKzj/preview"
                 },
-                // RESTORED: These objects populate the "Coming Soon" section
                 {
                     id: 2, title: "Earrings", description: "Exploring the highest peaks.",
                     thumbnail: "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=800&q=80",
@@ -76,7 +75,6 @@ const loveNotes = [
     "I love every version of you I've gotten to know.", "And most of all, I love you—not because of 100 reasons, but because even after trying to list them all, I still feel like I've left something out."
 ];
 
-// NEW: Particle Engine
 function spawnParticles() {
     const emojis = ['🌸', '🌺', '❤️', '💖', '✨'];
     const envelopeRect = document.querySelector('.envelope-wrapper').getBoundingClientRect();
@@ -101,13 +99,7 @@ function spawnParticles() {
             duration: 1 + Math.random() * 0.5,
             ease: "power2.out",
             onComplete: () => {
-                gsap.to(p, {
-                    y: window.innerHeight + 100,
-                    duration: 1.5 + Math.random(),
-                    ease: "power1.in",
-                    opacity: 0,
-                    onComplete: () => p.remove()
-                });
+                gsap.to(p, { y: window.innerHeight + 100, duration: 1.5 + Math.random(), ease: "power1.in", opacity: 0, onComplete: () => p.remove() });
             }
         });
     }
@@ -115,7 +107,6 @@ function spawnParticles() {
 
 const initApp = async () => {
     try {
-        // --- 0. Background Music Engine ---
         const bgm = new Audio('https://res.cloudinary.com/pbekirv1/video/upload/v1787314732/Navjot_Ahuja_-_Khat_Official_Audio.mp3');
         bgm.loop = true; bgm.volume = 0; let bgmStarted = false;
 
@@ -126,9 +117,8 @@ const initApp = async () => {
                     gsap.to(bgm, { volume: 0.2, duration: 3, ease: "power2.inOut" });
                 }).catch(err => console.warn("Audio autoplay blocked.", err));
             }
-        }, { once: true });
+        });
 
-        // --- 1. Fetch & Build Hero ---
         const videos = await fetchExternalData();
         const hero = document.getElementById('hero-section');
         hero.style.backgroundImage = `linear-gradient(to right, rgba(20,20,20,0.9) 0%, rgba(20,20,20,0.4) 100%), url('${videos[0].thumbnail}')`;
@@ -137,7 +127,6 @@ const initApp = async () => {
 
         document.querySelector('.play-btn').addEventListener('click', () => {
             if (bgmStarted) gsap.to(bgm, { volume: 0, duration: 1, onComplete: () => bgm.pause() });
-
             const modal = document.createElement('div');
             modal.style.cssText = 'position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background-color: rgba(0, 0, 0, 0.95); z-index: 100000; display: flex; justify-content: center; align-items: center; opacity: 0;';
             modal.innerHTML = `<div class="close-video" style="position: absolute; top: 30px; right: 40px; color: white; font-size: 3.5rem; cursor: pointer; z-index: 100001;">&times;</div><div style="width: 90vw; height: 85vh; max-width: 1600px;"><iframe src="${videos[0].videoEmbedUrl}" style="width: 100%; height: 100%; border: none; border-radius: 8px;" allow="autoplay; fullscreen" allowfullscreen></iframe></div>`;
@@ -150,7 +139,6 @@ const initApp = async () => {
             });
         });
 
-        // --- 2. Catalog Section ---
         const carousel = document.getElementById('trending-carousel');
         videos.forEach(video => {
             const card = document.createElement('div');
@@ -161,15 +149,12 @@ const initApp = async () => {
             overlay.className = 'card-overlay';
             overlay.textContent = 'work in progress please wait to be amused';
             card.appendChild(overlay);
-
             card.addEventListener('click', () => localStorage.setItem('lastWatched', video.id));
             carousel.appendChild(card);
         });
 
-        // --- 3. 3D Image Orbit ---
         const imageCarousel = document.getElementById('image-carousel-3d');
         const imgRadius = 450; 
-        
         orbitalImages.forEach((src, i) => {
             const angle = (360 / orbitalImages.length) * i;
             const item = document.createElement('div');
@@ -182,7 +167,6 @@ const initApp = async () => {
         let imgRotY = 0, imgStartX = 0, imgDragging = false, imgStartRot = 0;
         const imgScene = document.querySelector('.image-scene');
         gsap.set(imageCarousel, { z: -imgRadius, rotationY: 0, transformStyle: "preserve-3d" });
-
         let autoRotate = gsap.to(imageCarousel, { rotationY: "+=360", duration: 60, repeat: -1, ease: "none" });
 
         imgScene.addEventListener('pointerdown', (e) => {
@@ -201,7 +185,6 @@ const initApp = async () => {
             gsap.to(imageCarousel, { rotationY: imgRotY + ((e.clientX - imgStartX) * 0.5), duration: 1.5, ease: "power2.out", onComplete: () => autoRotate.progress(0).play() });
         });
 
-        // --- 4. Infinite Parallax Text ---
         const parallaxContainer = document.getElementById('infinite-parallax');
         const gridW = 4000, gridH = 4000; const cardsData = [];
 
@@ -243,7 +226,34 @@ const initApp = async () => {
         }
         updateParallax();
 
-        // --- 5: Envelope & Letter Logic ---
+        // 5. Envelope & Lock Screen Reveal Sequence
+        const lockScreen = document.getElementById('lock-screen');
+        const passInput = document.getElementById('passphrase');
+        const unlockBtn = document.getElementById('unlock-btn');
+        const lockError = document.getElementById('lock-error');
+
+        const unlockSite = () => {
+            if (passInput.value.trim().toUpperCase() === "YOUMEUS") {
+                gsap.to(lockScreen, {
+                    opacity: 0, duration: 0.6, ease: "power2.out",
+                    onComplete: () => {
+                        lockScreen.remove();
+                        // Site Entrance Animations
+                        gsap.to('.navbar', { opacity: 1, y: 0, duration: 0.8, ease: "power3.out" });
+                        gsap.to('.hero-content', { opacity: 1, y: 0, duration: 0.8, ease: "power3.out", delay: 0.2 });
+                        gsap.to('.catalog, .gallery-section', { opacity: 1, y: 0, duration: 1, stagger: 0.2, delay: 0.4 });
+                    }
+                });
+            } else {
+                gsap.fromTo('.lock-box', { x: -10 }, { x: 10, yoyo: true, repeat: 3, duration: 0.1, ease: "power2.inOut" });
+                lockError.style.opacity = 1;
+                passInput.value = "";
+            }
+        };
+
+        unlockBtn.addEventListener('click', unlockSite);
+        passInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') unlockSite(); });
+
         const envelopeWrapper = document.querySelector('.envelope-wrapper');
         const flap = document.querySelector('.flap');
         const heartSeal = document.querySelector('.heart-seal');
@@ -256,15 +266,11 @@ const initApp = async () => {
         envelopeWrapper.addEventListener('click', () => {
             if (!envelopeOpen) {
                 envelopeOpen = true;
-                
-                // Explode Particles
                 spawnParticles();
 
-                // Open Envelope Timeline
                 const tl = gsap.timeline();
                 tl.to(heartSeal, { scale: 0, opacity: 0, duration: 0.3 })
                   .to(flap, { rotateX: 180, duration: 0.6, ease: "power2.inOut" })
-                  // CRITICAL FIX: Pushes the flap behind the letter once opened
                   .set(flap, { zIndex: 1 }) 
                   .to(letterPreview, { y: -80, duration: 0.5, ease: "back.out(1.2)" });
             } else {
@@ -276,17 +282,14 @@ const initApp = async () => {
             gsap.to(letterModal, { opacity: 0, duration: 0.3, onComplete: () => letterModal.style.pointerEvents = 'none' });
         });
 
-        // --- 6. Preloader Destruction ---
+        // 6. Preloader Exit -> Reveals Lock Screen
         const tl = gsap.timeline();
         const heartLoader = document.querySelector('.heart-loader');
         const heartPath = heartLoader.querySelector('path'); 
         const preloader = document.getElementById('preloader');
 
-        tl.to(heartLoader, { scale: 50, opacity: 0, duration: 0.8, ease: "power4.in", onStart: () => { heartPath.style.fill = '#FFB6C1'; heartPath.style.stroke = 'transparent'; heartLoader.style.animation = 'none'; }})
-        .to(preloader, { opacity: 0, duration: 0.4, ease: "power2.out", onStart: () => preloader.style.pointerEvents = 'none', onComplete: () => preloader.remove() }, "-=0.4")
-        .from('.navbar', { y: -80, opacity: 0, duration: 0.8, ease: "power3.out" }, "-=0.2")
-        .from('.hero-content > *', { y: 30, opacity: 0, duration: 0.8, stagger: 0.15, ease: "power3.out" }, "-=0.6")
-        .from('.catalog, .gallery-section', { opacity: 0, y: 50, duration: 1, stagger: 0.2 }, "-=0.2");
+        tl.to(heartLoader, { scale: 50, opacity: 0, duration: 0.8, delay: 1, ease: "power4.in", onStart: () => { heartPath.style.fill = '#FFB6C1'; heartPath.style.stroke = 'transparent'; heartLoader.style.animation = 'none'; }})
+        .to(preloader, { opacity: 0, duration: 0.4, ease: "power2.out", onStart: () => preloader.style.pointerEvents = 'none', onComplete: () => preloader.remove() });
 
     } catch (error) {
         console.error("Failed to load application data:", error);
