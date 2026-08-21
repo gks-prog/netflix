@@ -1,3 +1,4 @@
+// --- DATA CONFIGURATION ---
 const fetchExternalData = async () => {
     return new Promise(resolve => {
         setTimeout(() => {
@@ -30,6 +31,13 @@ const orbitalImages = [
     "https://drive.google.com/thumbnail?id=1z2w2CdXRCDwA7SILUlbqrGWGkcXP1fLJ&sz=w800",
     "https://drive.google.com/thumbnail?id=1JJKGVLHWpCZbmXodYox3BaAbwXt9vQMo&sz=w800",
     "https://drive.google.com/thumbnail?id=1pzDYoTwzqKD2wrwgIVAuYaJKfopyDjfY&sz=w800"
+];
+
+// SWAP THESE PLACEHOLDERS WITH YOUR 3 CHOSEN PICTURES
+const savedImagesData = [
+    "https://images.unsplash.com/photo-1518173946687-a4c8892bbd9f?auto=format&fit=crop&w=800&q=80",
+    "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=800&q=80",
+    "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=800&q=80"
 ];
 
 const loveNotes = [
@@ -75,6 +83,7 @@ const loveNotes = [
     "I love every version of you I've gotten to know.", "And most of all, I love you—not because of 100 reasons, but because even after trying to list them all, I still feel like I've left something out."
 ];
 
+// --- PARTICLE ENGINE ---
 function spawnParticles() {
     const emojis = ['🌸', '🌺', '❤️', '💖', '✨'];
     const envelopeRect = document.querySelector('.envelope-wrapper').getBoundingClientRect();
@@ -105,20 +114,22 @@ function spawnParticles() {
     }
 }
 
+// --- INIT APP ---
 const initApp = async () => {
     try {
+        // Background Music
         const bgm = new Audio('https://res.cloudinary.com/pbekirv1/video/upload/v1787314732/Navjot_Ahuja_-_Khat_Official_Audio.mp3');
         bgm.loop = true; bgm.volume = 0; let bgmStarted = false;
 
         window.addEventListener('pointerdown', () => {
             if (!bgmStarted) {
                 bgmStarted = true;
-                bgm.play().then(() => {
-                    gsap.to(bgm, { volume: 0.2, duration: 3, ease: "power2.inOut" });
-                }).catch(err => console.warn("Audio autoplay blocked.", err));
+                bgm.play().then(() => { gsap.to(bgm, { volume: 0.2, duration: 3, ease: "power2.inOut" }); })
+                .catch(err => console.warn("Audio autoplay blocked.", err));
             }
         });
 
+        // 1. Build Hero & Catalog
         const videos = await fetchExternalData();
         const hero = document.getElementById('hero-section');
         hero.style.backgroundImage = `linear-gradient(to right, rgba(20,20,20,0.9) 0%, rgba(20,20,20,0.4) 100%), url('${videos[0].thumbnail}')`;
@@ -144,15 +155,12 @@ const initApp = async () => {
             const card = document.createElement('div');
             card.className = 'card';
             card.style.backgroundImage = `url('${video.thumbnail}')`;
-            
-            const overlay = document.createElement('div');
-            overlay.className = 'card-overlay';
-            overlay.textContent = 'work in progress please wait to be amused';
-            card.appendChild(overlay);
+            card.innerHTML = `<div class="card-overlay">work in progress please wait to be amused</div>`;
             card.addEventListener('click', () => localStorage.setItem('lastWatched', video.id));
             carousel.appendChild(card);
         });
 
+        // 2. 3D Image Orbit
         const imageCarousel = document.getElementById('image-carousel-3d');
         const imgRadius = 450; 
         orbitalImages.forEach((src, i) => {
@@ -185,6 +193,7 @@ const initApp = async () => {
             gsap.to(imageCarousel, { rotationY: imgRotY + ((e.clientX - imgStartX) * 0.5), duration: 1.5, ease: "power2.out", onComplete: () => autoRotate.progress(0).play() });
         });
 
+        // 3. Infinite Parallax Text
         const parallaxContainer = document.getElementById('infinite-parallax');
         const gridW = 4000, gridH = 4000; const cardsData = [];
 
@@ -203,18 +212,9 @@ const initApp = async () => {
         });
 
         let panX = 0, panY = 0, pStartX = 0, pStartY = 0, pDragging = false;
-        parallaxContainer.addEventListener('pointerdown', (e) => {
-            pDragging = true; pStartX = e.clientX - panX; pStartY = e.clientY - panY; gsap.killTweensOf(window); 
-        });
-        window.addEventListener('pointermove', (e) => {
-            if (!pDragging) return;
-            panX = e.clientX - pStartX; panY = e.clientY - pStartY; updateParallax();
-        });
-        window.addEventListener('pointerup', (e) => {
-            if (!pDragging) return;
-            pDragging = false;
-            gsap.to(window, { duration: 1.5, ease: "power2.out", onUpdate: () => { panX += (e.clientX - (pStartX + panX)) * 0.1; panY += (e.clientY - (pStartY + panY)) * 0.1; updateParallax(); } });
-        });
+        parallaxContainer.addEventListener('pointerdown', (e) => { pDragging = true; pStartX = e.clientX - panX; pStartY = e.clientY - panY; gsap.killTweensOf(window); });
+        window.addEventListener('pointermove', (e) => { if (!pDragging) return; panX = e.clientX - pStartX; panY = e.clientY - pStartY; updateParallax(); });
+        window.addEventListener('pointerup', (e) => { if (!pDragging) return; pDragging = false; gsap.to(window, { duration: 1.5, ease: "power2.out", onUpdate: () => { panX += (e.clientX - (pStartX + panX)) * 0.1; panY += (e.clientY - (pStartY + panY)) * 0.1; updateParallax(); } }); });
 
         function updateParallax() {
             const cx = window.innerWidth / 2; const cy = window.innerHeight / 2;
@@ -226,11 +226,66 @@ const initApp = async () => {
         }
         updateParallax();
 
-        // 5. Envelope & Lock Screen Reveal Sequence
+        // 4. Envelope Logic
+        const envelopeWrapper = document.querySelector('.envelope-wrapper');
+        const flap = document.querySelector('.flap');
+        const heartSeal = document.querySelector('.heart-seal');
+        const letterPreview = document.getElementById('letter-preview');
+        const letterModal = document.getElementById('full-letter-modal');
+        const closeLetterBtn = document.querySelector('.close-letter');
+        let envelopeOpen = false;
+
+        envelopeWrapper.addEventListener('click', () => {
+            if (!envelopeOpen) {
+                envelopeOpen = true;
+                spawnParticles();
+                const tl = gsap.timeline();
+                tl.to(heartSeal, { scale: 0, opacity: 0, duration: 0.3 })
+                  .to(flap, { rotateX: 180, duration: 0.6, ease: "power2.inOut" })
+                  .set(flap, { zIndex: 1 }) 
+                  .to(letterPreview, { y: -100, duration: 0.6, ease: "back.out(1.2)" });
+            } else {
+                gsap.to(letterModal, { opacity: 1, duration: 0.4, onStart: () => letterModal.style.pointerEvents = 'auto' });
+            }
+        });
+        closeLetterBtn.addEventListener('click', () => gsap.to(letterModal, { opacity: 0, duration: 0.3, onComplete: () => letterModal.style.pointerEvents = 'none' }) );
+
+        // 5. Saved Pictures Lightbox
+        const savedGrid = document.getElementById('saved-grid');
+        const lightbox = document.getElementById('image-lightbox');
+        const lightboxImg = document.getElementById('lightbox-img');
+        const closeLightbox = document.querySelector('.close-lightbox');
+
+        savedImagesData.forEach(src => {
+            const card = document.createElement('div');
+            card.className = 'saved-card';
+            card.innerHTML = `<img src="${src}" alt="Saved Memory">`;
+            card.addEventListener('click', () => {
+                lightboxImg.src = src;
+                gsap.to(lightbox, { opacity: 1, duration: 0.3, onStart: () => lightbox.style.pointerEvents = 'auto' });
+            });
+            savedGrid.appendChild(card);
+        });
+
+        const hideLightbox = () => gsap.to(lightbox, { opacity: 0, duration: 0.3, onComplete: () => lightbox.style.pointerEvents = 'none' });
+        closeLightbox.addEventListener('click', hideLightbox);
+        lightbox.addEventListener('click', (e) => { if(e.target === lightbox) hideLightbox(); });
+
+        // 6. Lock Screen & Scroll Animations Engine
         const lockScreen = document.getElementById('lock-screen');
         const passInput = document.getElementById('passphrase');
         const unlockBtn = document.getElementById('unlock-btn');
         const lockError = document.getElementById('lock-error');
+
+        // Scroll Reveal Observer
+        const revealObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                    revealObserver.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.15 });
 
         const unlockSite = () => {
             if (passInput.value.trim().toUpperCase() === "YOUMEUS") {
@@ -238,51 +293,24 @@ const initApp = async () => {
                     opacity: 0, duration: 0.6, ease: "power2.out",
                     onComplete: () => {
                         lockScreen.remove();
-                        // Site Entrance Animations
+                        // Immediate Entrance
                         gsap.to('.navbar', { opacity: 1, y: 0, duration: 0.8, ease: "power3.out" });
                         gsap.to('.hero-content', { opacity: 1, y: 0, duration: 0.8, ease: "power3.out", delay: 0.2 });
-                        gsap.to('.catalog, .gallery-section', { opacity: 1, y: 0, duration: 1, stagger: 0.2, delay: 0.4 });
+                        
+                        // Start observing elements for scroll-based entrance
+                        document.querySelectorAll('.scroll-reveal').forEach(sec => revealObserver.observe(sec));
                     }
                 });
             } else {
                 gsap.fromTo('.lock-box', { x: -10 }, { x: 10, yoyo: true, repeat: 3, duration: 0.1, ease: "power2.inOut" });
-                lockError.style.opacity = 1;
-                passInput.value = "";
+                lockError.style.opacity = 1; passInput.value = "";
             }
         };
 
         unlockBtn.addEventListener('click', unlockSite);
         passInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') unlockSite(); });
 
-        const envelopeWrapper = document.querySelector('.envelope-wrapper');
-        const flap = document.querySelector('.flap');
-        const heartSeal = document.querySelector('.heart-seal');
-        const letterPreview = document.getElementById('letter-preview');
-        const letterModal = document.getElementById('full-letter-modal');
-        const closeLetterBtn = document.querySelector('.close-letter');
-        
-        let envelopeOpen = false;
-
-        envelopeWrapper.addEventListener('click', () => {
-            if (!envelopeOpen) {
-                envelopeOpen = true;
-                spawnParticles();
-
-                const tl = gsap.timeline();
-                tl.to(heartSeal, { scale: 0, opacity: 0, duration: 0.3 })
-                  .to(flap, { rotateX: 180, duration: 0.6, ease: "power2.inOut" })
-                  .set(flap, { zIndex: 1 }) 
-                  .to(letterPreview, { y: -80, duration: 0.5, ease: "back.out(1.2)" });
-            } else {
-                gsap.to(letterModal, { opacity: 1, duration: 0.4, onStart: () => letterModal.style.pointerEvents = 'auto' });
-            }
-        });
-
-        closeLetterBtn.addEventListener('click', () => {
-            gsap.to(letterModal, { opacity: 0, duration: 0.3, onComplete: () => letterModal.style.pointerEvents = 'none' });
-        });
-
-        // 6. Preloader Exit -> Reveals Lock Screen
+        // Preloader Exit
         const tl = gsap.timeline();
         const heartLoader = document.querySelector('.heart-loader');
         const heartPath = heartLoader.querySelector('path'); 
