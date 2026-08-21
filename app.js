@@ -175,3 +175,117 @@ const initApp = async () => {
 };
 
 document.addEventListener('DOMContentLoaded', initApp);
+// Data for the 3D Text Helix
+const loveNotes = [
+    "I love your smile.", "I love the way your eyes light up when you're happy.", "I love how deeply you feel things.",
+    "I love your softness.", "I love how much you care about people.", "I love your pure intentions.",
+    "I love the way you try to see good in people.", "I love your little expressions.", "I love hearing your voice.",
+    "I love the way you say my name.", "I love your laugh.", "I love when you get shy.", "I love your stubborn side.",
+    "I love how passionate you can become about something you care about.", "I love your honesty with me.",
+    "I love that you tell me what's actually going on inside your head.", "I love your vulnerable side.",
+    "I love that you trust me with your fears.", "I love your random thoughts.", "I love our stupid conversations.",
+    "I love the silence we can share too.", "I love the comfort of simply being around you.", "I love how your presence changes my mood.",
+    "I love how one message from you can make my entire day different.", "I love your hugs.", "I love the feeling of having you close to me.",
+    "I love looking at you when you don't know I'm looking.", "I love your sleepy face.", "I love your annoyed face.",
+    "I love your cute angry moments.", "I love when you pretend not to care.", "I love when you secretly do care.",
+    "I love the little things you remember.", "I love the way you notice things other people overlook.", "I love your emotional depth.",
+    "I love how protective you can be about the people you love.", "I love how you want everyone around you to be okay.",
+    "I love your kindness.", "I love your empathy.", "I love your ability to make people feel heard.",
+    "I love that you don't have to pretend to be perfect around me.", "I love that I get to see the real you.",
+    "I love your imperfections.", "I love your complicated sides.", "I love the parts of you that you're still learning to understand.",
+    "I love that you're still growing.", "I love watching you become more confident.", "I love your strength, especially when you don't realize you have it.",
+    "I love how much you've survived without letting it completely change your heart.", "I love that there's still softness inside you despite everything.",
+    "I love your little habits.", "I love your random moods.", "I love your dramatic moments.", "I love when you tease me.",
+    "I love when you make fun of me.", "I love our inside jokes.", "I love the memories we've already created.",
+    "I love that some ordinary moments with you somehow become special.", "I love how time feels different when I'm with you.",
+    "I love missing you because it reminds me how much you mean to me.", "I love the way you make me want to become better.",
+    "I love that you make me think about my future differently.", "I love how seriously I take your happiness.",
+    "I love wanting to protect your peace.", "I love being someone you can lean on.", "I love being able to make you smile.",
+    "I love when I know I've made your difficult day a little easier.", "I love seeing you genuinely happy.",
+    "I love when you get excited about something.", "I love listening to you talk about things you're passionate about.",
+    "I love your dreams.", "I love your little hopes for the future.", "I love imagining the places we could go together.",
+    "I love the possibility of all the memories we haven't made yet.", "I love that there's still so much about you I want to discover.",
+    "I love learning new things about you.", "I love how you can surprise me.", "I love that you don't fit into one simple description.",
+    "I love that you're more than just the version everyone else sees.", "I love the person you are when you feel completely safe.",
+    "I love how your guard slowly comes down with me.", "I love every little moment when you let me closer.",
+    "I love knowing that you don't have to carry everything alone when you're with me.", "I love the trust we're building.",
+    "I love the connection we're creating.", "I love that our relationship isn't just about happy moments.",
+    "I love that we can have difficult conversations and still choose to understand each other.", "I love that you're honest when you're scared.",
+    "I love that you tell me when you're unsure.", "I love you even when you don't know how to receive my love.",
+    "I love you even when your mind tells you things that make you doubt us.", "I love that I don't need you to be perfect to choose you.",
+    "I love that I don't love some imaginary version of you.", "I love you as you are right now.",
+    "I love the person I become when I'm genuinely caring for you.", "I love that knowing you has changed parts of me.",
+    "I love that your happiness matters to me in a way that's difficult to explain.", "I love that out of all the people in the world, somehow I found you.",
+    "I love every version of you I've gotten to know.", "And most of all, I love you—not because of 100 reasons, but because even after trying to list them all, I still feel like I've left something out."
+];
+
+// Inside initApp()... replace the previous orbital logic with this:
+        
+        // 4. Build 3D Text Helix
+        const carousel3d = document.getElementById('carousel-3d');
+        const radius = 700; // Wider radius to accommodate 100 cards
+        const ySpread = 45; // Vertical spacing between each card
+        
+        // Inject sentences in a spiral pattern
+        loveNotes.forEach((text, i) => {
+            const angle = i * 16; // Degrees of rotation between each card
+            const yOffset = (i - (loveNotes.length / 2)) * ySpread; // Centers the helix vertically
+            
+            const item = document.createElement('div');
+            item.className = 'text-card';
+            item.style.transform = `translateY(${yOffset}px) rotateY(${angle}deg) translateZ(${radius}px)`;
+            item.innerHTML = `<p>${text}</p>`;
+            carousel3d.appendChild(item);
+        });
+
+        // Helix Drag & Scroll Logic
+        let rotationY = 0;
+        let translateY = 0;
+        let startX = 0;
+        let startY = 0;
+        let isDragging = false;
+        let startRotation = 0;
+        let startTranslation = 0;
+        const scene = document.querySelector('.scene');
+
+        gsap.set(carousel3d, { z: -radius, rotationY: 0, y: 0, transformStyle: "preserve-3d" });
+
+        scene.addEventListener('pointerdown', (e) => {
+            isDragging = true;
+            startX = e.clientX;
+            startY = e.clientY;
+            startRotation = rotationY;
+            startTranslation = translateY;
+            gsap.killTweensOf(carousel3d); 
+        });
+
+        window.addEventListener('pointermove', (e) => {
+            if (!isDragging) return;
+            const deltaX = e.clientX - startX;
+            const deltaY = e.clientY - startY;
+            
+            rotationY = startRotation + (deltaX * 0.3); // Horizontal drag spins it
+            translateY = startTranslation + (deltaY * 1.5); // Vertical drag moves it up/down
+            
+            gsap.set(carousel3d, { rotationY: rotationY, y: translateY });
+        });
+
+        window.addEventListener('pointerup', (e) => {
+            if (!isDragging) return;
+            isDragging = false;
+            
+            const deltaX = e.clientX - startX;
+            const deltaY = e.clientY - startY;
+            
+            // Add momentum glide
+            gsap.to(carousel3d, {
+                rotationY: rotationY + (deltaX * 0.4), 
+                y: translateY + (deltaY * 1.2),
+                duration: 1.5,
+                ease: "power2.out",
+                onUpdate: () => {
+                    rotationY = gsap.getProperty(carousel3d, "rotationY");
+                    translateY = gsap.getProperty(carousel3d, "y");
+                }
+            });
+        });
