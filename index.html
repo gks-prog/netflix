@@ -12,6 +12,19 @@
             <path d="M 50,30 C 50,30 40,10 25,10 C 10,10 5,25 5,40 C 5,60 50,90 50,90 C 50,90 95,60 95,40 C 95,25 90,10 75,10 C 60,10 50,30 50,30 Z" />
         </svg>
     </div>
+
+    <!-- NEW: Password Lock Screen -->
+    <div id="lock-screen">
+        <div class="lock-box">
+            <h2>Protected Memory</h2>
+            <p>Please enter our word to continue.</p>
+            <div class="input-group">
+                <input type="password" id="passphrase" class="lock-input" placeholder="Passphrase" autocomplete="off">
+                <button id="unlock-btn" class="lock-btn">Unlock</button>
+            </div>
+            <p id="lock-error" class="error-msg">Incorrect passphrase.</p>
+        </div>
+    </div>
     
     <header class="navbar">
         <h1 class="logo">Betti</h1>
@@ -31,7 +44,6 @@
             </div>
         </section>
 
-        <!-- RESTORED: Catalog Section -->
         <section class="catalog" id="catalog-section">
             <h3>Coming Soon</h3> 
             <div class="carousel" id="trending-carousel"></div>
@@ -49,9 +61,8 @@
             <div class="infinite-parallax-container" id="infinite-parallax"></div>
         </section>
 
-        <!-- FIXED: Envelope Letter Section -->
         <section class="gallery-section envelope-section" id="letter-section">
-            <h3>A Letter For You</h3>
+            <h3 class="parallax-title" style="position: relative; top: 0; margin-bottom: 80px;">A Letter For You</h3>
             <div class="envelope-wrapper">
                 <div class="envelope">
                     <div class="flap"></div>
