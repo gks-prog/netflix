@@ -35,9 +35,9 @@ const orbitalImages = [
 
 // SWAP THESE PLACEHOLDERS WITH YOUR 3 CHOSEN PICTURES
 const savedImagesData = [
-    "https://images.unsplash.com/photo-1518173946687-a4c8892bbd9f?auto=format&fit=crop&w=800&q=80",
-    "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=800&q=80",
-    "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=800&q=80"
+    "https://drive.google.com/thumbnail?id=1uY5K-7mFg64Ase8n_MhYR7zV5pV4ykTA&sz=w800",
+    "https://drive.google.com/thumbnail?id=1_G8he0OaA3igggu4C7N1X19iC4rVA0Mk&sz=w800",
+    "https://drive.google.com/thumbnail?id=1cOu_tvaexfjQNwmafm7KZvAX8qQuyn6w&sz=w800"
 ];
 
 const loveNotes = [
