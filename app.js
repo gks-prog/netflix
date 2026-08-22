@@ -33,7 +33,7 @@ const orbitalImages = [
     "https://drive.google.com/thumbnail?id=1pzDYoTwzqKD2wrwgIVAuYaJKfopyDjfY&sz=w800"
 ];
 
-// SWAP THESE PLACEHOLDERS WITH YOUR 3 CHOSEN PICTURES
+// INJECTED: Your converted Google Drive image links
 const savedImagesData = [
     "https://drive.google.com/thumbnail?id=1uY5K-7mFg64Ase8n_MhYR7zV5pV4ykTA&sz=w800",
     "https://drive.google.com/thumbnail?id=1_G8he0OaA3igggu4C7N1X19iC4rVA0Mk&sz=w800",
@@ -117,17 +117,9 @@ function spawnParticles() {
 // --- INIT APP ---
 const initApp = async () => {
     try {
-        // Background Music
+        // --- 0. Background Music Engine Initialization ---
         const bgm = new Audio('https://res.cloudinary.com/pbekirv1/video/upload/v1787314732/Navjot_Ahuja_-_Khat_Official_Audio.mp3');
         bgm.loop = true; bgm.volume = 0; let bgmStarted = false;
-
-        window.addEventListener('pointerdown', () => {
-            if (!bgmStarted) {
-                bgmStarted = true;
-                bgm.play().then(() => { gsap.to(bgm, { volume: 0.2, duration: 3, ease: "power2.inOut" }); })
-                .catch(err => console.warn("Audio autoplay blocked.", err));
-            }
-        });
 
         // 1. Build Hero & Catalog
         const videos = await fetchExternalData();
@@ -226,7 +218,7 @@ const initApp = async () => {
         }
         updateParallax();
 
-        // 4. Envelope Logic
+        // 4. Envelope & Audio Trigger Logic
         const envelopeWrapper = document.querySelector('.envelope-wrapper');
         const flap = document.querySelector('.flap');
         const heartSeal = document.querySelector('.heart-seal');
@@ -238,7 +230,19 @@ const initApp = async () => {
         envelopeWrapper.addEventListener('click', () => {
             if (!envelopeOpen) {
                 envelopeOpen = true;
+                
+                // Explode Particles
                 spawnParticles();
+
+                // TRIGGER AUDIO ON ENVELOPE OPEN
+                if (!bgmStarted) {
+                    bgmStarted = true;
+                    bgm.play().then(() => {
+                        gsap.to(bgm, { volume: 0.2, duration: 3, ease: "power2.inOut" });
+                    }).catch(err => console.warn("Audio autoplay blocked.", err));
+                }
+
+                // Envelope Animation
                 const tl = gsap.timeline();
                 tl.to(heartSeal, { scale: 0, opacity: 0, duration: 0.3 })
                   .to(flap, { rotateX: 180, duration: 0.6, ease: "power2.inOut" })
@@ -277,7 +281,6 @@ const initApp = async () => {
         const unlockBtn = document.getElementById('unlock-btn');
         const lockError = document.getElementById('lock-error');
 
-        // Scroll Reveal Observer
         const revealObserver = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
                 if (entry.isIntersecting) {
@@ -293,11 +296,8 @@ const initApp = async () => {
                     opacity: 0, duration: 0.6, ease: "power2.out",
                     onComplete: () => {
                         lockScreen.remove();
-                        // Immediate Entrance
                         gsap.to('.navbar', { opacity: 1, y: 0, duration: 0.8, ease: "power3.out" });
                         gsap.to('.hero-content', { opacity: 1, y: 0, duration: 0.8, ease: "power3.out", delay: 0.2 });
-                        
-                        // Start observing elements for scroll-based entrance
                         document.querySelectorAll('.scroll-reveal').forEach(sec => revealObserver.observe(sec));
                     }
                 });
